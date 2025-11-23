@@ -89,3 +89,23 @@ if (empty($errors)) {
     }
 }
 
+$errors = $_SESSION['errors'] ?? [];
+$old_inputs = $_SESSION['old_inputs'] ?? [];
+$books = [];
+if ($customer_ID) {
+    $sQuery = "SELECT DISTINCT b.book_ID, b.description, b.price
+     FROM Book b
+     LEFT JOIN Review rv 
+     ON b.book_ID = rv.book_ID AND rv.customer_ID = :customer_ID
+     LEFT JOIN Rental r 
+     ON b.book_ID = r.Book_ID AND r.customer_ID = :customer_ID
+     LEFT JOIN Purchase p 
+     ON b.book_ID = p.Book_ID AND p.customer_ID = :customer_ID
+     WHERE rv.review_ID IS NULL
+     AND (r.Book_ID IS NOT NULL OR p.Book_ID IS NOT NULL)";
+
+$stmt = $conn->prepare($sQuery);
+$stmt->execute(['customer_ID' => $customer_ID]);
+$books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+

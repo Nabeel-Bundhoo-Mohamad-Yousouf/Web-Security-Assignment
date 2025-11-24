@@ -1,0 +1,149 @@
+/* ==========================
+   style.css for Bookstore Register + Login + Contact&About
+
+
+/* ===== Reset===== */
+* { box-sizing: border-box; }
+html,body { height: 100%; margin: 0; padding: 0; }
+
+
+:root{
+  --bg1: #f3e7e9;
+  --bg2: #e3eeff;
+  --card-bg: rgba(255,255,255,0.96);
+  --accent: #6a5acd;
+  --accent-strong: #5947d3;
+  --muted: #6b7280;
+  --danger: #d8000c;
+  --shadow: 0 8px 25px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --pad: 16px;
+  --max-width: 420px;
+  --glass-blur: 6px;
+}
+
+body{
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
+  background: linear-gradient(135deg, var(--bg1), var(--bg2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 32px;
+  color: #222;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Centered page layout 
+.center-page {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+}
+
+/* ===== Layout ===== */
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  background: var(--card-bg);
+  padding: calc(var(--pad) * 1.5);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(106,90,205,0.06);
+}
+
+/* ===== Header ===== */
+h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  letter-spacing: -0.2px;
+  color: #1f2937;
+}
+
+/* ===== Form groups ===== */
+form { width: 100%; }
+fieldset { border: none; padding: 0; margin: 0; }
+legend { display:none; } /* keep markup but hide legend visually */
+
+/* label style + spacing */
+label {
+  display:block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* inputs */
+.input, input[type="text"], input[type="password"], input[type="email"]{
+  width:100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+  outline: none;
+  transition: box-shadow .18s ease, border-color .18s ease, transform .05s ease;
+  background: white;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 6px 18px rgba(106,90,205,0.12);
+  transform: translateY(-1px);
+}
+
+/* error text */
+.error {
+  color: var(--danger);
+  font-size: 13px;
+  margin-top: 6px;
+  display:block;
+  min-height: 18px; /* reserve space so layout doesn't jump */
+}
+
+/* submit button */
+.btn {
+  display:inline-block;
+  width:100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: linear-gradient(180deg,var(--accent),var(--accent-strong));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(89,71,211,0.16);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0); opacity: .95; }
+
+/* text and links */
+.form-foot {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--muted);
+  text-align:center;
+}
+
+.form-foot a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.form-foot a:hover { text-decoration: underline; }
+
+
+@media (max-width: 480px) {
+  .container { padding: 20px; border-radius: 10px; }
+  h2 { font-size: 20px; }
+  :root { --max-width: 420px; }
+}

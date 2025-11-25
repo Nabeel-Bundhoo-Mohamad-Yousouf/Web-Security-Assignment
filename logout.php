@@ -10,25 +10,18 @@ session_destroy();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logging out...</title>
     <style>
-        /* Same background as register page */
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg, #f3e7e9, #e3eeff); /* pastel gradient */
-            color: #333;
-        }
-        .message-box {
-            background: rgba(255,255,255,0.95);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-            text-align: center;
-        }
+       
+       body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+  font-size: 16px;
+}
+        ..text-center {
+  text-align: center;
+}
+
     </style>
 </head>
 <body>

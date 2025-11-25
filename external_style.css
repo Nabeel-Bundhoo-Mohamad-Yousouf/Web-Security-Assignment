@@ -1,0 +1,655 @@
+
+:root {
+  /* Color Palette */
+  --color-primary: #155dfc;
+  --color-primary-dark: #9810fa;
+  --purple:#8e44ad;
+  --color-neutral-950: #030213;
+  --color-neutral-700: #717182;
+  --color-neutral-400: #99a1af;
+  --color-neutral-300: #d1d5dc;
+  --color-neutral-100: #f3f3f5;
+  --color-neutral-50: #eceef2;
+  
+  /* Background Colors */
+  --bg-white: #ffffff;
+  --bg-gray: #f3f3f5;
+  --bg-dark: #101828;
+  --bg-black: #000000;
+  
+  /* Text Colors */
+  --text-primary: #030213;
+  --text-secondary: #717182;
+  --text-muted: #99a1af;
+  --text-white: #ffffff;
+  --text-light: #d1d5dc;
+  
+  /* Accent Colors */
+  --color-success: #00a63e;
+  --color-warning: #fdc700;
+  --color-border: #364153;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  /* Shadows */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* Typography */
+  --font-family-base: 'Arimo', sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  
+  /* Transitions */
+  --transition-base: all 0.2s ease-in-out;
+}
+
+/* Font Face Declarations */
+
+@font-face {
+  font-family: 'Arimo';
+  src: local('Arimo Regular'), local('Arimo-Regular');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Arimo';
+  src: local('Arimo Bold'), local('Arimo-Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =============== Base Styles ==================*/
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--bg-white);
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*Header*/
+header {
+  z-index: 1000;
+  position: relative;
+  background-color: white;
+}
+
+header .container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+header .logo{
+  font-size: 26px;
+  color:var(--purple);
+  text-decoration: none;
+  font-weight: var(--font-weight-bold);
+  margin-left: 20px;
+}
+
+header .icons{
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+header .icons a {
+  font-size: 20px;
+  color:var(--black);
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+header .icons a:hover,
+header .icons a:active{
+   color:var(--purple);
+}
+
+.owner_access {
+  background: #FFF176;
+  color: #6D4C41;
+  padding: 4px 8px;
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.3s ease;
+  }
+
+  .owner_access:hover {
+  background-color: #FFD54F;
+  }
+
+/*Navbar*/
+.navbar ul {
+  display: flex;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.navbar li a{
+  color: var(--color-neutral-950) ;
+  font-weight: var(--font-weight-bold);
+  font-size:  17px;
+  text-decoration: none;
+  padding:6px 8px;
+  margin-bottom: 0px;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a:active {
+  color:var(--purple);
+  text-decoration: underline;
+}
+
+/*Icons*/ 
+.icons{
+  margin-right: 10px; 
+  padding-bottom: 6px;
+}
+
+/*Buttons*/
+button,
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+  line-height: 20px;
+  cursor: pointer;
+  transition: var(--transition-base);
+  border: none;
+  text-decoration: none;
+  width: 130px;
+  height: 38px;
+}
+
+button.primary_btn,
+a.btn.primary_btn {
+  background-color: var(--bg-black);
+  background-repeat: no-repeat;
+  color: var(--text-white);
+}
+
+button.primary_btn:hover,
+a.btn.primary_btn:hover {
+  background-color: #1a1a2e;
+}
+
+button.secondary_btn,
+a.btn.secondary_btn {
+  background-color: var(--bg-white);
+  background-repeat: no-repeat;
+  color: var(--text-primary);
+  border: 0.889px solid rgba(0, 0, 0, 0.1);
+}
+
+button.secondary_btn:hover,
+a.btn.secondary_btn:hover {
+  background-color: var(--bg-gray);
+}
+
+/*Form Input*/
+input, select { 
+  display: flex;
+  padding: 4px 20px 6px 10px;
+  margin: 6px 12px 10px 10px;
+  width: 100%;
+  background-color: var(--bg-gray);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text-primary);
+  cursor: pointer;
+  align-items: center;
+  transition: var(--transition-base);
+  outline: none;
+}
+
+/*input:placeholder-shown {}*/
+input::placeholder {
+  color: var(--text-secondary);
+}
+
+select:focus {
+  border-color: var(--bg-dark);
+}
+
+/*Footer*/
+footer {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  padding: 48px 16px;
+}
+
+footer.logo {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-white);
+}
+
+.footer_heading {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-white);
+  margin-bottom: var(--spacing-md);
+}
+
+a.footer_link {
+  font-size: 13px;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+a.footer_link:hover {
+  color: var(--text-white);
+}
+
+.footer_copyright {
+  display:flex;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  align-items: center;
+}
+
+.footer_divider {
+  border-width:0.1px;
+  color: var(--color-border);
+}
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.gradient-primary {
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary-dark));
+}
+
+.text-gradient {
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hover-lift {
+  transition: var(--transition-base);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ============================================
+   Component Styles
+   ============================================ */
+
+/* Hero Section */
+#hero-section {
+  position: relative;
+  background: linear-gradient(to right, var(--color-primary), var(--color-primary-dark));
+  border-radius: var(--radius-md);
+  padding: 48px 16px;
+  overflow: hidden;
+}
+
+#hero-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--bg-black);
+  opacity: 0.4;
+}
+
+#hero-section__content {
+  position: relative;
+  z-index: 1;
+}
+
+#hero-section__title {
+  font-size: 24px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-white);
+  line-height: 32px;
+  margin-bottom: var(--spacing-md);
+}
+
+#hero-section__description {
+  font-size: 16px;
+  color: var(--text-white);
+  line-height: 24px;
+  opacity: 0.9;
+}
+
+/* Home Book Card */
+.book-card {
+  box-sizing: border-box;
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition-base);
+  border: 0.889px solid rgba(0, 0, 0, 0.1);
+  padding: 10px;
+}
+
+.book-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.book-card__image {
+  width: 100%;
+  height: 300;
+  background-color: #f3f4f6;
+  object-fit: cover;
+}
+
+.book-card__badge {
+  background-color: var(--color-neutral-50);
+  padding: 2.889px 8.889px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: var(--font-weight-normal);
+  color: var(--text-primary);
+}
+
+.book-card__title {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  line-height: 24px;
+}
+
+.book-card__author {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 20px;
+}
+
+.book-card__description {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 20px;
+}
+
+.truncate_multi_line {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.book-card__price {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.book-card__price_borrow {
+  color: var(--color-success);
+  font-weight: var(--font-weight-bold);
+  text-align: right;
+}
+
+.book-card__stock {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* Star Rating */
+.star-rating span{
+  display: inline-block;;
+  color: var(--color-warning);
+}
+
+/* Book Preview */
+.preview_grid {
+    display: grid;
+    grid-gap: var(--spacing-xs);
+    margin-left: 50px;
+    grid-template-columns: 2fr;
+    grid-template-columns: repeat(auto-fill);
+}
+.preview-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    margin-left: 50px;
+}
+
+.preview-card__image {
+    width: 80%;        
+    height: auto;      
+    object-fit: cover;  
+    border-radius: 6px;
+}
+
+.preview-card__title {
+    font-size: 24px;
+    font-weight: var(--font-weight-bold);
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.preview-card__author {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.preview-card__description {
+    margin-top: 20px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+button.add_to_cart_btn {
+    background-color:var(--purple);
+    width: 150px;
+    color: var(--text-white);
+    margin-left: 50px;
+    border-radius: var(--radius-sm);
+}
+
+button.add_to_cart_btn:hover {
+    opacity: 60%;
+}
+
+.btn-tabs-container {
+    display: flex;
+    justify-content: center;
+}
+
+.btn-tabs {
+    display: flex;
+    gap: 20px; 
+    justify-content: center;
+}
+
+.tab_btn {
+    width: 150px;                   
+    padding: 12px 10px;
+    text-align: center;
+    border-radius: var(--radius-sm);
+    border: 2px solid #dcdcdc;
+    background-color: #f2f2f2;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.25s ease;
+}
+
+.tab_btn.active {        
+    color: var(--text-primary);
+    border-color:var(--color-warning);
+}
+
+.tab_btn:hover {
+    background-color: #eaeaea;
+    color: var(--text-primary);
+}
+
+
+/*Review Card */
+.review-card{
+    border: 0.889px solid rgba(0, 0, 0, 0.1);
+    margin: 0 0.5em;
+    background-color: var(--bg-gray);
+    font-size: 20px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    padding: 10px;
+    max-width: 400px;
+    transition: 0.3s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.10);
+}
+
+.review-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.05;
+}
+
+a.review_btn {
+    width: 200px;
+}
+
+a.review_btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Carousel controls styling */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(30%) brightness(0.3);
+    translate:50% 120%;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%;
+}
+
+
+/* Container Utilities */
+.container-fluid {
+  margin: 0 auto;
+  padding: 10px 16px;
+}
+
+/* Responsive Grid */
+.books-grid {
+  display: grid;
+  gap: var(--spacing-xs);
+  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .books-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .books-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .books-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .book-card {
+    page-break-inside: avoid;
+  }
+}

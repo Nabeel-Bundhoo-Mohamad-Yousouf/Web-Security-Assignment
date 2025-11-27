@@ -68,6 +68,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $_SESSION['logged_in'] = $username;
                     $_SESSION['user_id'] = $user_ID;
                     $_SESSION['customer_id'] = $customer['customer_ID']; 
+                    
+                    // Set cookies
+                    setcookie('last_login', time(), time() + 2 * 24 * 60 * 60);
+                    setcookie('username', $username, time() + 2 * 24 * 60 * 60);
+
                     header("Location: welcome.php");
                     exit;
                 } else {

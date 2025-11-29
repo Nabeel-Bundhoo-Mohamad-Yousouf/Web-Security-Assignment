@@ -206,7 +206,6 @@ if (!empty($result)){
                         </p>
                         <p class="review-title"><?php echo $row["review"] ?> </p>
                         <p class="review-text truncate_multi_line">
-                            <?php echo $row["description"] ?>
                         </p>
                     </div>
                 </div>
@@ -234,3 +233,4 @@ if (!empty($result)){
     <?php include("includes/../footer.html")?>
 </body>
 </html>
+

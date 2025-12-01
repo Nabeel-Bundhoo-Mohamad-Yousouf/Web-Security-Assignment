@@ -1,0 +1,43 @@
+/*Footer Styles*/
+footer {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  padding: 48px 16px;
+}
+
+footer.logo {
+  font-size: 20px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-white);
+}
+
+.footer_heading {
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-white);
+  margin-bottom: var(--spacing-md);
+}
+
+a.footer_link {
+  font-size: 13px;
+  color: var(--text-light);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+a.footer_link:hover {
+  color: var(--text-white);
+}
+
+.footer_copyright {
+  display:flex;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-muted);
+  align-items: center;
+}
+
+.footer_divider {
+  border-width:0.1px;
+  color: var(--color-border);
+}

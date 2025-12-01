@@ -38,28 +38,7 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
 
     //Handles search query
     if (!empty($search)) {
-
-/*
-DELIMITER $$
-
-CREATE PROCEDURE search_books(IN search_term TEXT, IN genre_search TEXT, IN filter TEXT)
-BEGIN
-SELECT b.*, COALESCE(COUNT(r.rating), 0) AS rating_num, COALESCE(AVG(r.rating),0) AS avg_rating  
-FROM book AS b 
-LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-WHERE b.title LIKE CONCAT('%',search_term, '%') OR b.author LIKE CONCAT('%',search_term, '%') 
-AND (genre_search IS NULL OR genre_search = b.genre)
-ORDER BY 
-CASE WHEN filter LIKE '%author%' THEN b.author END,
-CASE WHEN filter LIKE '%price_asc%' THEN b.price END ASC,
-CASE WHEN filter LIKE '%price_desc%' THEN b.price END DESC,
-b.title ASC
-LIMIT 6;
-END $$
-
-DELIMITER ;
- */
-
+        
         $statement_prepd = $conn->prepare("CALL search_books(?, ?, ?)");
         $statement_prepd -> execute([$search, $genre, $filter]);
 
@@ -70,21 +49,6 @@ DELIMITER ;
     } //Handles links in footer
     elseif (isset($_GET['referer'])) {
     $genre = $_GET["genre"] ?? "";
-
-/*
-DELIMITER $$
-
-CREATE PROCEDURE footer_filters (IN genre_filter TEXT)
-BEGIN
-SELECT b.*, COUNT(r.rating) AS rating_num, AVG(r.rating) AS avg_rating
-FROM book AS b 
-LEFT JOIN review AS r ON b.book_ID = r.book_ID
-WHERE b.genre= genre_filter;
-END $$
-
-DELIMITER ;
- */
-
     $statement_prepd = $conn->prepare("CALL footer_filters(?)");
     $statement_prepd -> execute([$genre]);
 
@@ -94,16 +58,8 @@ DELIMITER ;
     } 
     else {
         //Handles direct homepage access  
-
-/*CREATE VIEW view_books AS
-SELECT b.*, COUNT(r.rating) AS rating_num, AVG(r.rating) AS avg_rating 
-FROM book AS b 
-LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-GROUP BY b.book_ID
-ORDER BY avg_rating ASC
-LIMIT 12;
- */
         $statement_prepd = $conn->query("SELECT * FROM view_books");
+        
         $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
         $statement_prepd->closeCursor();
     }
@@ -113,21 +69,19 @@ LIMIT 12;
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>bibliohaha- Home</title>
-<!--https://gist.github.com/david-bakin/255660af79c386460cdf0ee6a2a96291?permalink_comment_id=3540313 -->
+    <title>Buy & Rent Books Online | Bibliohaha</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name = "keywords" content="books">
-    <meta name = "description" content="Buy & Rent books at the best and affordable prices. Read customer reviews.">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name = "robots" content="index, archive, follow">
-    <link rel="stylesheet" href="css/external_style.css"> 
+
+    <meta name = "description" content="Buy & Rent books online at affordable prices. Fast delivery and best customer experience.">
+    <meta name = "robots" content="index, follow">
+
+    <link rel="preload" href="../css/external_style.css" as="style">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-
+    
     <style>
         .search {
             display: flex;
@@ -279,12 +233,11 @@ LIMIT 12;
             ?>
             
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
 
     <!--Include footer.html-->
     <?php require("includes/../footer.html")?>
 
 </body>
+
 </html>

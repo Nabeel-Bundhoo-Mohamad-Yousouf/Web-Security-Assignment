@@ -110,11 +110,11 @@ VALUES (2134, '1984', 'George Orwell', 'Science Fiction', 'Nineteen Eighty-Four 
 (2136, 'Steve Jobs', 'Walter Isaacson', 'Bibliography', 'Steve Jobs is the authorized self-titled biography of American business magnate and Apple co-founder Steve Jobs. The book was written at the request of Jobs by Walter Isaacson, a former executive at CNN and Time who had previously written best-selling biographies of Benjamin Franklin and Albert Einstein.', 480.00, 90.00, 10,"Steve Jobs.jpg"),
 (2137, 'The Catcher in the Rye', 'J.D.Salinger', 'Fiction', 'The Catcher in the Rye (1951) opens with the sixteen-year-old Holden Caulfield who is disillusioned departure from what may be the last in a series of schools that have failed to inspire, nurture, or support him, followed by a painful, sleep-deprived odyssey through the streets of New York City.', 395.00, 75.00, 3,"The Catcher in the Rye.png"),
 (2138, 'The Girl with the Dragon Tattoo', 'Stieg Larsson', 'Mystery', 'The premise of the book happens around the disappearance of Harriet Vanger who is part of a notable Swedish family. Her disappearance happened over forty years ago, and journalist Michael Blomkvist is hired by an aged uncle to help investigate this mystery.', 425.00, 80.00, 14,"The Girl with the Dragon Tatoo.jpg"),
-(2139, 'The Great Gatsby','F.Scott Fitzgerald', 'Fiction','The story of the mysteriously wealthy Jay Gatsby and his love for the beautiful Daisy Buchanan, of lavish parties on Long Island at a time when The New York Times noted ìgin was the national drink and sex the national obsession,î it is an exquisitely crafted tale of America in the 1920s.', 450.00, 85.00, 15,"The Great Gatsby.jpg"),
-(2140, 'The Name of the Wind', 'Patrick Rothfuss', 'Fantasy', 'So begins a tale unequaled in fantasy literatureóthe story of a hero told in his own voice. It is a tale of sorrow, a tale of survival, a tale of the search for meaning in his universe, and how that search, and the indomitable will that drove it, gave birth to a legend.', 440.00, 85.00, 16,"The Name of the Wind.jpg"),
+(2139, 'The Great Gatsby','F.Scott Fitzgerald', 'Fiction','The story of the mysteriously wealthy Jay Gatsby and his love for the beautiful Daisy Buchanan, of lavish parties on Long Island at a time when The New York Times noted ‚Äúgin was the national drink and sex the national obsession,‚Äù it is an exquisitely crafted tale of America in the 1920s.', 450.00, 85.00, 15,"The Great Gatsby.jpg"),
+(2140, 'The Name of the Wind', 'Patrick Rothfuss', 'Fantasy', 'So begins a tale unequaled in fantasy literature‚Äîthe story of a hero told in his own voice. It is a tale of sorrow, a tale of survival, a tale of the search for meaning in his universe, and how that search, and the indomitable will that drove it, gave birth to a legend.', 440.00, 85.00, 16,"The Name of the Wind.jpg"),
 (2141, 'To Kill a Mockingbird', 'Harper Lee', 'Fiction', 'To Kill a Mockingbird is a 1961 novel by Harper Lee. Set in small-town Alabama, the novel is a bildungsroman, or coming-of-age story, and chronicles the childhood of Scout and Jem Finch as their father Atticus defends a Black man falsely accused of rape. Scout and Jem are mocked by classmates for this.', 380.00, 70.00, 12,"To Kill a Mockingbird.jpg");
 
-CREATE PROCEDURE book_preview_search (IN search_ID INT)
+CREATE PROCEDURE book_preview_search (IN search_title INT)
 BEGIN
     -- First query: Book details with aggregate ratings
     SELECT 
@@ -123,7 +123,7 @@ BEGIN
         AVG(r.rating) AS avg_rating
     FROM book AS b 
     LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-    WHERE b.book_ID = search_ID 
+    WHERE b.title = search_title 
     GROUP BY b.book_ID;
     
     -- Second query: Individual reviews for the book
@@ -177,3 +177,4 @@ LEFT JOIN review AS r ON b.book_ID = r.book_ID
 GROUP BY b.book_ID
 ORDER BY avg_rating ASC
 LIMIT 12;
+

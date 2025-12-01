@@ -1,8 +1,29 @@
+:root {
+  /* Color Palette */
+  --purple:#8e44ad;
+  --color-neutral-950: #030213;
+
+  /* Background Colors */
+  --bg-white: #ffffff;
+
+  /* Text Colors */
+  --text-primary: #030213;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+
+  /* Typography */
+  --font-family-base: 'Arimo', sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+}
+
 /*Header*/
 header {
   z-index: 1000;
   position: relative;
-  background-color: white;
+  background-color: var(--bg-white);
 }
 
 header .container-fluid {
@@ -29,7 +50,7 @@ header .icons{
 
 header .icons a {
   font-size: 20px;
-  color:var(--black);
+  color:var(--text-primary);
   text-decoration: none;
   transition: 0.3s ease;
 }
@@ -45,7 +66,7 @@ header .icons a:active{
   padding: 4px 8px;
   border-radius: var(--radius-md);
   font-size: 8px;
-  font-weight: var(--font-weight-bold);
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;

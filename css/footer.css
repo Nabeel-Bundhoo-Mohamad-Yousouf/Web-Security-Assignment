@@ -1,3 +1,32 @@
+:root {
+  /* Background Colors */
+  --bg-dark: #101828;
+
+  /* Text Colors */
+  --text-primary: #030213;
+  --text-light: #d1d5dc;
+  --text-white: #ffffff;
+  --text-muted: #99a1af;
+
+  /* Accent Colors */
+  --color-border: #364153;
+
+  /* Spacing */
+  --spacing-md: 16px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+
+  /* Typography */
+  --font-family-base: 'Arimo', sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+
+  /* Transitions */
+  --transition-base: all 0.2s ease-in-out;  
+}
+
 /*Footer Styles*/
 footer {
   background-color: var(--bg-dark);

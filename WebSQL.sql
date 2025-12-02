@@ -105,7 +105,7 @@ CREATE TABLE Review (
 );
 
 -- Messages table
-CREATE TABLE messages (
+CREATE TABLE Messages (
 	meesage_ID AUTO_INCREMENT PRIMARY KEY,
 	sender_name VARCHAR(100) NOT NULL,
 	sender_email VARCHAR(255) NOT NULL,
@@ -186,5 +186,6 @@ LEFT JOIN review AS r ON b.book_ID = r.book_ID
 GROUP BY b.book_ID
 ORDER BY avg_rating ASC
 LIMIT 12;
+
 
 

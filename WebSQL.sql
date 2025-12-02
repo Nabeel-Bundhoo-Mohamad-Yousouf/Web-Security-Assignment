@@ -104,6 +104,15 @@ CREATE TABLE Review (
     FOREIGN KEY (book_ID) REFERENCES Book(book_ID)
 );
 
+-- Messages table
+CREATE TABLE messages (
+	meesage_ID AUTO_INCREMENT PRIMARY KEY,
+	sender_name VARCHAR(100) NOT NULL,
+	sender_email VARCHAR(255) NOT NULL,
+	message_text TEXT NOT NULL,
+	date_sent DATETIME NOT NULL
+);
+
 INSERT INTO book (book_ID,title,author,genre,description,price,rental_fee,stock_num,img_url)
 VALUES (2134, '1984', 'George Orwell', 'Science Fiction', 'Nineteen Eighty-Four is a dystopian novel by the English writer George Orwell. It was published on 8 June 1949 by Secker & Warburg as his ninth and final completed book. Thematically, it centres on totalitarianism, mass surveillance and repressive regimentation of people and behaviours.', 420.00, 80.00, 8,"1984.jpg"),
 (2135, 'Pride and Prejudice', 'Jane Austen', 'Romance' , 'Pride and Prejudice is a novel of manners by Jane Austen, first published in 1813. The story follows the main character, Elizabeth Bennet, as she deals with issues of manners, upbringing, morality, education, and marriage in the society of the landed gentry of the British Regency.',  350.00 , 65.00, 20,"Pride and Prejudice.jpg"),
@@ -177,4 +186,5 @@ LEFT JOIN review AS r ON b.book_ID = r.book_ID
 GROUP BY b.book_ID
 ORDER BY avg_rating ASC
 LIMIT 12;
+
 

@@ -93,8 +93,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <title>Login</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.cssxx">
 
 </head>
 <body class="center-page">
@@ -107,11 +108,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <legend>Login Details</legend>
 
         Username: <br>
-        <input type="text" name="txt_username" value="<?php echo $username; ?>"><br>
+        <input type="text" name="txt_username" value="<?php echo $username; ?>" required pattern="[A-Za-z ]{3,30}" title="3–30 letters only."><br>
         <?php echo $usernameErr; ?><br>
 
         Password: <br>
-        <input type="password" name="txt_password"><br>
+        <input type="password" name="txt_password" required minlength="8" pattern="^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
+        title="Must contain at least 8 characters, including uppercase, lowercase, number, and special symbol."><br>
         <?php echo $passwordErr; ?><br>
 
         <?php echo $loginErr; ?><br>

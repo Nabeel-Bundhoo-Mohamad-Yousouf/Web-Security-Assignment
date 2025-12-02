@@ -31,7 +31,7 @@ CREATE TABLE Book (
     title TEXT,
     author TEXT,
     genre TEXT,
-    description TEXT,
+    book_description TEXT,
     price DECIMAL(10,2),
     rental_fee DECIMAL(10,2),
     stock_num INT,
@@ -98,7 +98,7 @@ CREATE TABLE Review (
     book_ID INT,
     rating INT,
     review TEXT,
-    description TEXT,
+    review_description TEXT,
     date DATE,
     FOREIGN KEY (customer_ID) REFERENCES Customer(customer_ID),
     FOREIGN KEY (book_ID) REFERENCES Book(book_ID)
@@ -113,7 +113,7 @@ CREATE TABLE Messages (
 	date_sent DATETIME NOT NULL
 );
 
-INSERT INTO book (book_ID,title,author,genre,description,price,rental_fee,stock_num,img_url)
+INSERT INTO book (book_ID,title,author,genre,book_description,price,rental_fee,stock_num,img_url)
 VALUES (2134, '1984', 'George Orwell', 'Science Fiction', 'Nineteen Eighty-Four is a dystopian novel by the English writer George Orwell. It was published on 8 June 1949 by Secker & Warburg as his ninth and final completed book. Thematically, it centres on totalitarianism, mass surveillance and repressive regimentation of people and behaviours.', 420.00, 80.00, 8,"1984.jpg"),
 (2135, 'Pride and Prejudice', 'Jane Austen', 'Romance' , 'Pride and Prejudice is a novel of manners by Jane Austen, first published in 1813. The story follows the main character, Elizabeth Bennet, as she deals with issues of manners, upbringing, morality, education, and marriage in the society of the landed gentry of the British Regency.',  350.00 , 65.00, 20,"Pride and Prejudice.jpg"),
 (2136, 'Steve Jobs', 'Walter Isaacson', 'Bibliography', 'Steve Jobs is the authorized self-titled biography of American business magnate and Apple co-founder Steve Jobs. The book was written at the request of Jobs by Walter Isaacson, a former executive at CNN and Time who had previously written best-selling biographies of Benjamin Franklin and Albert Einstein.', 480.00, 90.00, 10,"Steve Jobs.jpg"),
@@ -138,7 +138,7 @@ BEGIN
     -- Second query: Individual reviews for the book
     SELECT 
         r.review, 
-        r.description, 
+        r.review_description, 
         r.date, 
         c.customer_name
     FROM review AS r
@@ -186,6 +186,7 @@ LEFT JOIN review AS r ON b.book_ID = r.book_ID
 GROUP BY b.book_ID
 ORDER BY avg_rating ASC
 LIMIT 12;
+
 
 
 

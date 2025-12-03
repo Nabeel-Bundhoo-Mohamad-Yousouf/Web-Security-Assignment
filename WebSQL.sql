@@ -156,8 +156,9 @@ BEGIN
 SELECT b.*, COALESCE(COUNT(r.rating), 0) AS rating_num, COALESCE(AVG(r.rating),0) AS avg_rating  
 FROM book AS b 
 LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-WHERE b.title LIKE CONCAT('%',search_term, '%') OR b.author LIKE CONCAT('%',search_term, '%') 
+WHERE (b.title LIKE CONCAT('%',search_term, '%') OR b.author LIKE CONCAT('%',search_term, '%')) 
 AND (genre_search IS NULL OR genre_search = b.genre)
+GROUP BY b.book_ID
 ORDER BY 
 CASE WHEN filter LIKE '%author%' THEN b.author END,
 CASE WHEN filter LIKE '%price_asc%' THEN b.price END ASC,
@@ -185,8 +186,9 @@ SELECT b.*, COUNT(r.rating) AS rating_num, AVG(r.rating) AS avg_rating
 FROM book AS b 
 LEFT JOIN review AS r ON b.book_ID = r.book_ID 
 GROUP BY b.book_ID
-ORDER BY avg_rating ASC
+ORDER BY avg_rating DESC
 LIMIT 12;
+
 
 
 

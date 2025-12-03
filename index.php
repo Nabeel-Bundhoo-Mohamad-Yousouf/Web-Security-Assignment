@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 //Initiates custom execption handler
 set_exception_handler("custom_exception_handler");
@@ -172,17 +171,17 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
     <!--Display books-->
     <div class="container-fluid">
         
-        <!--Shows the number of books on display-->
-        <p style="color:  #99a1af; margin-top: 10px;"> 
+        <!--Shows the number of books on display--> 
             <?php 
             if (empty($results)) {
             ?>
                 <h2 id= "hero-section__title" style="color: var(--text-primary);"> Sorry! No books found. </h2>
             <?php
             } else {
-                echo "Showing " .count($results). " books";
-            ?>
-        </p>
+                ?>
+                <p style="color:  #99a1af; margin-top: 10px;">
+                    <?php echo "Showing " .count($results). " books" ?>
+                </p>
         
         <div class="row g-3">
 
@@ -264,3 +263,4 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
 
 </body>
 </html>
+

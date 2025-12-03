@@ -1,5 +1,4 @@
 <?php 
-session_start();
 
 //Initiates custom execption handler
 set_exception_handler("custom_exception_handler");
@@ -235,6 +234,7 @@ if (!empty($result)){
     <?php include("includes/footer.html")?>
 </body>
 </html>
+
 
 
 

@@ -190,6 +190,13 @@ ORDER BY avg_rating DESC
 LIMIT 12;
 
 
+CREATE VIEW vw_total_revenue AS
+SELECT COALESCE(SUM(p.price * p.quantity), 0) AS total_revenue
+FROM Purchase p
+WHERE p.status = 'completed';
+
+
+
 
 
 

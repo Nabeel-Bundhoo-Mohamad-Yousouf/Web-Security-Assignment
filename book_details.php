@@ -1,28 +1,61 @@
 <?php 
 session_start();
 
-// Include the database connection file
-require_once "includes/../db_connect.php"; 
+//Initiates custom execption handler
+set_exception_handler("custom_exception_handler");
+
+error_reporting(E_ALL);                         //logs all the errors
+ini_set("display_errors", 0);                   //hides errors from display
+ini_set("log_errors", 1);                       //enables logging
+ini_set("error_log", __DIR__. "/php_error.log");
+
+class CustomException extends Exception{
+    public function error_message () {
+        return "Error: {$this->getMessage()} in {$this->getFile()} on line {$this->getLine()} \n | Trace {$this->getTraceAsString()} \n";
+    }
+}
+//Handles exception; logs exceptions insttead of printing on browser.
+function custom_exception_handler($exception) {
+    if (method_exists($exception, "error_message")) {
+        $msg = $exception->error_message();
+    } else {
+        $msg = "Error: {$exception->getMessage()} in {$exception->getFile()} on line {$exception->getLine()} \n | Trace {$exception->getTraceAsString()} \n";
+    }
+
+    error_log($msg. "\n",3, __DIR__ ."/book_details_php_errors.log");
+    echo "An unexpected error occured. Please try again.";
+}
+
 
 // Reads search and genre values submitted (via GET) when book is clicked
 if ($_SERVER ["REQUEST_METHOD"] == "GET") {
-    $search = htmlspecialchars($_GET["id"]);
-    $genre = $_GET["genre"];
+    $genre = htmlspecialchars($_GET["genre"]);
+    $search_title = htmlspecialchars($_GET["title"]);
 
     //Save genre in cookie for 10 days
     setcookie("last_genre", $genre, time()+ (10*24*60*60), "/");
 
-    if (!empty($search)) {
-        $statement_prepd = $conn->prepare("CALL book_preview_search(?)");
-        $statement_prepd -> execute([$search]);
-        $result = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
-        $statement_prepd->closeCursor();
+    if (!empty($search_title)) {
+
+        try{
+            // Include the database connection file
+            require_once "includes/db_connect.php"; 
+            $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            $statement_prepd = $db_conn->prepare("CALL book_preview_search(?)");
+            $statement_prepd -> execute([$search_title]);
+            $result = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
+            $statement_prepd->closeCursor();
+
+        } catch (PDOException $e) {
+        throw new CustomException($e->getMessage());
+        }
     }
 }
 if (!empty($result)){
     foreach ($result as $row) {
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -36,15 +69,17 @@ if (!empty($result)){
     <meta name = "description" content="<?php echo $row["title"]. " by " .$row["author"]?> - available to buy & rent at affordable prices. Fast delivery and best customer reviews.">
     <meta name = "robots" content="index, follow">
 
-    <link rel="preload" href="../css/external_style.css" as="style">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
-
+    
 </head>
 <body>
     <!--Include header.html/header.php-->
-    <?php include("includes/../header.php");?>
+    <?php include("includes/header.php");?>
 
     <!--Book Preview-->
     <div class="container-fluid preview_container">
@@ -54,7 +89,7 @@ if (!empty($result)){
             <!-- Image + Buttons -->
             <div class="col-lg-5 col-md-6 col-sm-12 flex-column align-items-center ">
 
-                <img class=" card-img-top img-responsive rounded book-card__image" 
+                <img class="img-responsive rounded preview-card__image" 
                     src="images/<?php echo $row["img_url"] ?>" alt="Image of <?php echo $row["title"]?>">
 
                 <!--Display buy and rental fees-->
@@ -128,7 +163,7 @@ if (!empty($result)){
                 </div>
 
                 <p class="preview-card__description">
-                    <?php echo $row["description"]?>
+                    <?php echo $row["book_description"]?>
                 </p>
             </div>
         </div>
@@ -143,7 +178,7 @@ if (!empty($result)){
             <h4 class="mb-0 preview-title">Customer Reviews</h4>
 
             <!-- Write Review btn -->
-            <a href="Bstp_review.php" class="btn primary_btn review_btn"> Write a review </a> 
+            <a href="review.php" class="btn primary_btn review_btn"> Write a review </a> 
         </div>
 
         <!--User review cards-->
@@ -174,6 +209,7 @@ if (!empty($result)){
                         </p>
                         <p class="review-title"><?php echo $row["review"] ?> </p>
                         <p class="review-text truncate_multi_line">
+                            <?php echo $row["review_description"] ?>
                         </p>
                     </div>
                 </div>
@@ -193,10 +229,13 @@ if (!empty($result)){
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+
     <!--Include footer.html-->
-    <?php include("includes/../footer.html")?>
+    <?php include("includes/footer.html")?>
 </body>
 </html>
+
+
 
 

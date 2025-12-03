@@ -1,20 +1,42 @@
-<?php 
+<?php
 session_start();
 
-// Include the database connection file
-require_once "includes/../db_connect.php";
+//Initiates custom execption handler
+set_exception_handler("custom_exception_handler");
 
-$last_genre = $search = $genre = $filter = "";
+//Initialise variables
+$exception = $last_genre = $search = $genre = $filter = "";
 $results=[];
 
+error_reporting(E_ALL);                         //logs all the errors
+ini_set("display_errors", 0);                   //hides errors from display
+ini_set("log_errors", 1);                       //enables logging
+ini_set("error_log", __DIR__. "/php_error.log");
+
+//Function to sanitise and clean input
 function clean_input($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data);
-    return $data;
+    return htmlspecialchars(stripslashes(trim($data)));
 }
 
-//Checks and reads cookie of 
+class CustomException extends Exception{
+    public function error_message () {
+        return "Error: {$this->getMessage()} in {$this->getFile()} on line {$this->getLine()} \n | Trace {$this->getTraceAsString()} \n";
+    }
+}
+
+//Handles exception; logs exceptions instead of printing on browser.
+function custom_exception_handler($exception) {
+    if (method_exists($exception, "error_message")) {
+        $msg = $exception->error_message();
+    } else {
+        $msg = "Error: {$exception->getMessage()} in {$exception->getFile()} on line {$exception->getLine()} \n | Trace {$exception->getTraceAsString()} \n";
+    }
+
+    error_log($msg. "\n",3, __DIR__ ."/index_php_errors.log");
+    echo "An unexpected error occured. Please try again.";
+}
+
+//Checks and reads cookie of last viewed genre for recommendations
 if (isset($_COOKIE["last_genre"])) {
     $last_genre = $_COOKIE["last_genre"];
 }
@@ -29,42 +51,52 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
     //Redirects to avoid POST resubmission
     header("Location:index.php?search=" .urlencode($search). "&genre=" .urlencode($genre). "&filter=" .urlencode($filter));
     exit;
+    
 } else {
 
-    //Read data from GET (at direct load or redirect)
-    $search = htmlspecialchars($_GET["search"] ?? "");
-    $genre = htmlspecialchars($_GET["genre"] ?? "");
-    $filter = htmlspecialchars($_GET["filter"] ?? "title");
-
-    //Handles search query
-    if (!empty($search)) {
-        
-        $statement_prepd = $conn->prepare("CALL search_books(?, ?, ?)");
-        $statement_prepd -> execute([$search, $genre, $filter]);
-
-        //Retrieve results and frees connection
-        $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
-        $statement_prepd->closeCursor();
+    //Include the database connection file
+    require_once "includes/db_connect.php";
+    $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-    } //Handles links in footer
-    elseif (isset($_GET['referer'])) {
-    $genre = $_GET["genre"] ?? "";
-    $statement_prepd = $conn->prepare("CALL footer_filters(?)");
-    $statement_prepd -> execute([$genre]);
+    try {
+        //Read data from GET (at direct load or redirect)
+        $search = clean_input($_GET["search"] ?? "");
+        $genre = clean_input($_GET["genre"] ?? "");
+        $filter = clean_input($_GET["filter"] ?? "title");
 
-    $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
-    $statement_prepd->closeCursor();
+        //Handles search query
+        if (!empty($search)) {
 
-    } 
-    else {
-        //Handles direct homepage access  
-        $statement_prepd = $conn->query("SELECT * FROM view_books");
+            $statement_prepd = $db_conn->prepare("CALL search_books(?, ?, ?)");
+            $statement_prepd -> execute([$search, $genre, $filter]);
+
+            //Retrieve results and frees connection
+            $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
+            $statement_prepd->closeCursor();
         
+        } //Handles links in footer
+        elseif (isset($_GET['referer'])) {
+        $genre = $_GET["genre"] ?? "";
+
+        $statement_prepd = $db_conn->prepare("CALL footer_filters(?)");
+        $statement_prepd -> execute([$genre]);
+
         $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
         $statement_prepd->closeCursor();
+
+        } 
+        else {
+            //Handles direct homepage access
+            $statement_prepd = $db_conn->query("SELECT * FROM view_books");
+            $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
+            $statement_prepd->closeCursor();
+        }
+    } catch (PDOException $e) {
+        throw new CustomException($e->getMessage());
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -77,30 +109,20 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
     <meta name = "description" content="Buy & Rent books online at affordable prices. Fast delivery and best customer experience.">
     <meta name = "robots" content="index, follow">
 
-    <link rel="preload" href="../css/external_style.css" as="style">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> 
-    
-    <style>
-        .search {
-            display: flex;
-            align-items: center;
-            background-color:var(--bg-gray);
-            border-radius: var(--radius-sm);
-            padding-left:10px ;
-            border: none;
-            outline: none;
-        }
-        
-    </style>
 
 </head>
+
 <body>
-    <!--Include header.html/header.php-->
+    <!--Include header.php-->
     <?php 
     $activemenu = "home";
-    include("includes/../header.php");
+    include("includes/header.php");
     ?>
     
     <!--hero section-->
@@ -111,16 +133,18 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
     
     <!--search form-->
     <div class="container-fluid mt-3">
-        <div class="row align-items-start">
-            <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+        <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+            <div class="row g-2">
                 <!--Search Input-->
-                <div class="search col-6">
-                    <button type="submit" name="search_form"><i class="fa fa-search"></i></button>
-                    <input type="text" name="search" placeholder="Search books or authors.." 
-                    style="padding-left: 0%;">
+                <div class="col-12 col-md-6">
+                    <div class="search">
+                        <button type="submit" name="search_form"><i class="fa fa-search"></i></button>
+                        <input type="text" name="search" placeholder="Search books or authors.." 
+                        style="padding-left: 0%;">
+                    </div>
                 </div>
                 <!--Search Genre-->
-                <div class="col-3">
+                <div class="col-6 col-md-3">
                     <select class = "search-input dropdown" id="genre" name="genre">
                     <option value="">All</option>
                     <option value="fiction">Fiction</option>
@@ -133,7 +157,7 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
                     </select>
                 </div>
                 <!--Search Filter-->
-                <div class="col-3">
+                <div class="col-6 col-md-3">
                     <select class = "search-input dropdown" id="filter" name="filter" >
                     <option value="title">Title A-Z</option>
                     <option value="author">Author A-Z</option>
@@ -141,8 +165,8 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
                     <option value="price_desc">Price: High to Low</option>
                     </select>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
     <!--Display books-->
@@ -160,21 +184,22 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
             ?>
         </p>
         
-        <div class="row g-3 books-grid">
+        <div class="row g-3">
 
             <?php 
             //Iterates through results and displays them
                 foreach ($results as $row)    
                 {
             ?>
-            <!--Wraps card in link to redirect to book_details page when clicked-->
-            <a href="book_details.php?id=<?php echo $row["book_ID"]?>&genre=<?php echo $row["genre"]?>"
-            style="text-decoration: none;">
             
             <!--Book Card-->
-            <div class="col-lg-2 col-md-4 col-sm-6 col-12 book-card">
+            <div class="col-lg-2 col-md-4 col-sm-6 col-6 book-card">
+                
+            <!--Wraps card in link to redirect to book_details page when clicked-->
+                <a href="book_details.php?genre=<?php echo $row["genre"]?>&title=<?php echo $row["title"]?>"
+                style="text-decoration: none;">
 
-                <!--Card Image-->
+                    <!--Card Image-->
                     <img class=" card-img-top img-responsive rounded book-card__image" src="images/<?php echo $row["img_url"] ?>" 
                     alt="Image of <?php echo $row["title"]. " by " .$row["author"]?>"/>
                     
@@ -200,7 +225,7 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
                         </div>
                         <p class="book-card__title"> <?php echo $row["title"]?> </p>
                         <p class="book-card__author"> <?php echo $row["author"]?> </p>
-                        <p class="book-card__description truncate_multi_line"> <?php echo $row["description"]?> </p>
+                        <p class="book-card__description truncate_multi_line"> <?php echo $row["book_description"]?> </p>
                         <p> Buy: <span class="book-card__price"> <?php echo "Rs ". $row["price"]?> </span></p>
                         <p> Borrow (7 days): <span class="book-card__price_borrow"> <?php echo "Rs ". $row["rental_fee"] ?> </span></p>
                         <p class="book-card__stock"> <?php echo $row["stock_num"] ." in stock"?> </p>
@@ -224,20 +249,18 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
                 <?php 
                 }
                 ?>
+                </a>
             </div>
-            </a>
         </div>
-    </div>
             <?php
             } 
             ?>
             
 
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
 
-    <!--Include footer.html-->
-    <?php require("includes/../footer.html")?>
+<!--Include footer.html-->
+<?php require("includes/footer.html")?>
 
 </body>
-
 </html>

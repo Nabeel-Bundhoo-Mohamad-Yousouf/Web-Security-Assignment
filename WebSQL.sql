@@ -198,6 +198,70 @@ FROM Purchase p
 WHERE p.status = 'completed';
 
 
+DELIMITER //
+CREATE PROCEDURE GetCustomerID(IN username VARCHAR(50))
+BEGIN
+    SELECT c.customer_ID
+    FROM Customer c
+    JOIN Users u ON c.user_ID = u.user_ID
+    WHERE u.username = username;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE GetUnreviewedBooks(IN customer INT)
+BEGIN
+    -- Rentals
+    SELECT 'rental' AS type, r.Rent_ID AS record_ID, b.book_ID, b.description
+    FROM Rental r
+    JOIN Book b ON r.Book_ID = b.book_ID
+    WHERE r.customer_ID = customer AND r.reviewed = 0
+    UNION ALL
+
+    -- Purchases
+    SELECT 'purchase' AS type, p.purchase_ID AS record_ID, b.book_ID, b.description
+    FROM Purchase p
+    JOIN Book b ON p.Book_ID = b.book_ID
+    WHERE p.customer_ID = customer AND p.reviewed = 0;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE AddReviewAndMarkReviewed(
+    IN p_customer_ID INT,
+    IN p_book_ID INT,
+    IN p_rating INT,
+    IN p_review TEXT,
+    IN p_type VARCHAR(10),
+    IN p_record_ID INT
+)
+BEGIN
+    START TRANSACTION;
+    
+-- Insert review
+    INSERT INTO Review(customer_ID, book_ID, rating, review, date)
+    VALUES(p_customer_ID, p_book_ID, p_rating, p_review, CURDATE());
+    
+-- Mark rented books as reviewed 
+    UPDATE Rental
+    SET reviewed = 1
+    WHERE Rent_ID = p_record_ID
+    AND p_type = 'rental'; 
+
+-- Mark Purchased book as reviwed
+    UPDATE Purchase
+    SET reviewed = 1
+    WHERE purchase_ID = p_record_ID
+    AND p_type = 'purchase';
+
+    COMMIT;
+END //
+DELIMITER ;
+
+
+
 
 
 

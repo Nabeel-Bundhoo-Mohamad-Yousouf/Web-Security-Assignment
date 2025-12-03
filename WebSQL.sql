@@ -54,6 +54,7 @@ CREATE TABLE Purchase (
     date_time DATETIME,
     quantity INT,
     price DECIMAL(10,2),
+	reviewed BOOLEAN DEFAULT 0,
     FOREIGN KEY (customer_ID) REFERENCES Customer(customer_ID),
     FOREIGN KEY (Book_ID) REFERENCES Book(book_ID)
 );
@@ -65,6 +66,7 @@ CREATE TABLE Rental (
     Book_ID INT,
     start_date DATE,
     End_date DATE,
+	reviewed BOOLEAN DEFAULT 0,
     FOREIGN KEY (customer_ID) REFERENCES Customer(customer_ID),
     FOREIGN KEY (Book_ID) REFERENCES Book(book_ID)
 );
@@ -194,6 +196,7 @@ CREATE VIEW vw_total_revenue AS
 SELECT COALESCE(SUM(p.price * p.quantity), 0) AS total_revenue
 FROM Purchase p
 WHERE p.status = 'completed';
+
 
 
 

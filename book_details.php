@@ -78,7 +78,7 @@ if (!empty($result)){
     
 </head>
 <body>
-    <!--Include header.html/header.php-->
+    <!--Include header.php-->
     <?php include("includes/header.php");?>
 
     <!--Book Preview-->
@@ -208,7 +208,7 @@ if (!empty($result)){
                             <?php echo $row["customer_name"]. " • "  .$row["date"] ?>
                         </p>
                         <p class="review-title"><?php echo $row["review"] ?> </p>
-                        <p class="review-text truncate_multi_line">
+                        <p class="review-text">
                             <?php echo $row["review_description"] ?>
                         </p>
                     </div>
@@ -235,6 +235,7 @@ if (!empty($result)){
     <?php include("includes/footer.html")?>
 </body>
 </html>
+
 
 
 

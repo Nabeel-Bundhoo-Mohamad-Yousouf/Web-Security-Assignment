@@ -100,6 +100,7 @@ CREATE TABLE Review (
     review TEXT,
     review_description TEXT,
     date DATE,
+	reviewed BOOLEAN,
     FOREIGN KEY (customer_ID) REFERENCES Customer(customer_ID),
     FOREIGN KEY (book_ID) REFERENCES Book(book_ID)
 );
@@ -186,6 +187,7 @@ LEFT JOIN review AS r ON b.book_ID = r.book_ID
 GROUP BY b.book_ID
 ORDER BY avg_rating ASC
 LIMIT 12;
+
 
 
 

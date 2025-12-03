@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <title>Login</title>
-<link rel="stylesheet" href="style.cssxx">
+<link rel="stylesheet" href="style.css">
 
 </head>
 <body class="center-page">

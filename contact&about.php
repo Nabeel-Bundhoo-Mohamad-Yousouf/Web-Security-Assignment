@@ -104,9 +104,11 @@ if (isset($_SESSION['success'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bibliohaha - About & Contact</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.cssxx">
 </head>
 <body class="center-page">
     <div class="container">
@@ -147,15 +149,16 @@ if (isset($_SESSION['success'])) {
                 <legend>Send us a Message</legend>
 
                 <label for="name">Name:</label><br>
-                <input type="text" name="name" value="<?= $name ?>"><br>
+                <input type="text" name="name" value="<?= $name ?>" pattern="[A-Za-z ]+" minlength="3" maxlength="40" required><br>
                 <span style="color:red;"><?= $nameErr ?></span><br><br>
 
                 <label for="email">Email:</label><br>
-                <input type="text" name="email" value="<?= $email ?>"><br>
+                <input type="text" name="email" value="<?= $email ?>" required><br>
                 <span style="color:red;"><?= $emailErr ?></span><br><br>
 
                 <label for="message">Message:</label><br>
-                <textarea name="message" rows="5" cols="40"><?= $message ?></textarea><br>
+                <textarea name="message" rows="5" cols="40" minlength="5"  required><?= $message ?></textarea>
+
                 <span style="color:red;"><?= $messageErr ?></span><br><br>
 
                 <input type="submit" name="submit" value="Send Message">

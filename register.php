@@ -117,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <meta name="robots" content="noindex, nofollow">
 <title>Register</title>
 
-<link rel="stylesheet" href="style.cssxx">
+<link rel="stylesheet" href="style.css">
 </head>
 <body class="center-page">
     <div class="container">

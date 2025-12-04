@@ -64,7 +64,7 @@ function create_breadcrumbs() {
             <div class="icons">
                 <a class="owner_access " href="owner_dashboard.php"><i class="bi bi-sliders"> owner access</i></a>
                 <a href="login.php" class="<?php echo ($activemenu=='login') ? 'active':''; ?>" ><i class="bi bi-person"></i></a>
-                <a href="cart.php" class="<?php echo ($activemenu=='cart') ? 'active':''; ?>"> <i class="bi bi-cart2"></i> </a>
+                <a href="shopcart.php" class="<?php echo ($activemenu=='cart') ? 'active':''; ?>"> <i class="bi bi-cart2"></i> </a>
             </div>
         </div>
     </header>

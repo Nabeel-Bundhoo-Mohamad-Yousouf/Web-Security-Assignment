@@ -102,7 +102,6 @@ CREATE TABLE Review (
     review TEXT,
     review_description TEXT,
     date DATE,
-	reviewed BOOLEAN,
     FOREIGN KEY (customer_ID) REFERENCES Customer(customer_ID),
     FOREIGN KEY (book_ID) REFERENCES Book(book_ID)
 );
@@ -259,6 +258,7 @@ BEGIN
     COMMIT;
 END //
 DELIMITER ;
+
 
 
 

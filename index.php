@@ -1,9 +1,13 @@
 <?php
+session_start();
+
+//Holds state of whether or not user is logged in
+$is_logged_in = isset($_SESSION['logged_in']);
 
 //Initiates custom execption handler
 set_exception_handler("custom_exception_handler");
 
-//Initialise variables
+//Variable initialisation
 $exception = $last_genre = $search = $genre = $filter = "";
 $results=[];
 
@@ -12,14 +16,10 @@ ini_set("display_errors", 0);                   //hides errors from display
 ini_set("log_errors", 1);                       //enables logging
 ini_set("error_log", __DIR__. "/php_error.log");
 
-//Function to sanitise and clean input
-function clean_input($data) {
-    return htmlspecialchars(stripslashes(trim($data)));
-}
-
 class CustomException extends Exception{
     public function error_message () {
-        return "Error: {$this->getMessage()} in {$this->getFile()} on line {$this->getLine()} \n | Trace {$this->getTraceAsString()} \n";
+        return "Error: {$this->getMessage()} in {$this->getFile()} on line 
+        {$this->getLine()} \n | Trace {$this->getTraceAsString()} \n";
     }
 }
 
@@ -28,72 +28,59 @@ function custom_exception_handler($exception) {
     if (method_exists($exception, "error_message")) {
         $msg = $exception->error_message();
     } else {
-        $msg = "Error: {$exception->getMessage()} in {$exception->getFile()} on line {$exception->getLine()} \n | Trace {$exception->getTraceAsString()} \n";
+        $msg = "Error: {$exception->getMessage()} in {$exception->getFile()} on line 
+        {$exception->getLine()} \n | Trace {$exception->getTraceAsString()} \n";
     }
 
     error_log($msg. "\n",3, __DIR__ ."/index_php_errors.log");
     echo "An unexpected error occured. Please try again.";
 }
 
-//Checks and reads cookie of last viewed genre for recommendations
-if (isset($_COOKIE["last_genre"])) {
-    $last_genre = $_COOKIE["last_genre"];
+//Function to sanitise and clean input
+function clean_input($data) {
+    return htmlspecialchars(stripslashes(trim($data)));
 }
 
-//POST -> Redirect -> GET
-//Checks whether search form is submitted via POST
-if ($_SERVER["REQUEST_METHOD"]== "POST") {
-    $search = clean_input($_POST["search"] ?? "");
-    $genre = clean_input($_POST["genre"] ?? "");
-    $filter = clean_input($_POST["filter"] ?? "title");
+//Include the database connection file
+require_once "includes/db_conn.php";
+$db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    //Redirects to avoid POST resubmission
-    header("Location:index.php?search=" .urlencode($search). "&genre=" .urlencode($genre). "&filter=" .urlencode($filter));
-    exit;
-    
-} else {
-
-    //Include the database connection file
-    require_once "includes/db_connect.php";
-    $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    try {
+try {
+    //Handles search form request
+    if (isset ($_GET["search"]) && !empty($_GET["search"])) {
         //Read data from GET (at direct load or redirect)
-        $search = clean_input($_GET["search"] ?? "");
+        $search = clean_input($_GET["search"]);
         $genre = clean_input($_GET["genre"] ?? "");
         $filter = clean_input($_GET["filter"] ?? "title");
 
-        //Handles search query
-        if (!empty($search)) {
+        $statement_prepd = $db_conn->prepare("CALL search_books(?, ?, ?)");
+        $statement_prepd -> execute([$search, $genre, $filter]);
 
-            $statement_prepd = $db_conn->prepare("CALL search_books(?, ?, ?)");
-            $statement_prepd -> execute([$search, $genre, $filter]);
-
-            //Retrieve results and frees connection
-            $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
-            $statement_prepd->closeCursor();
-        
-        } //Handles links in footer
-        elseif (isset($_GET['referer'])) {
-        $genre = $_GET["genre"] ?? "";
-
-        $statement_prepd = $db_conn->prepare("CALL footer_filters(?)");
-        $statement_prepd -> execute([$genre]);
-
+        //Retrieve results and frees connection
         $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
         $statement_prepd->closeCursor();
+    
+    } //Handles links in footer
+    elseif (isset($_GET["referer"]) && $_GET["referer"] === "footer") {
+    $genre = clean_input($_GET["genre"] ?? "");
 
-        } 
-        else {
-            //Handles direct homepage access
-            $statement_prepd = $db_conn->query("SELECT * FROM view_books");
-            $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
-            $statement_prepd->closeCursor();
-        }
-    } catch (PDOException $e) {
-        throw new CustomException($e->getMessage());
+    $statement_prepd = $db_conn->prepare("CALL footer_filters(?)");
+    $statement_prepd -> execute([$genre]);
+
+    $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
+    $statement_prepd->closeCursor();
+
+    } 
+    else {
+        //Handles direct homepage access
+        $statement_prepd = $db_conn->query("SELECT * FROM view_books");
+        $results = $statement_prepd->fetchAll(PDO::FETCH_ASSOC);
+        $statement_prepd->closeCursor();
     }
+} catch (PDOException $e) {
+    throw new CustomException($e->getMessage());
 }
+
 ?>
 
 
@@ -132,7 +119,7 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
     
     <!--search form-->
     <div class="container-fluid mt-3">
-        <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="post">
+        <form action="<?php echo $_SERVER["PHP_SELF"];?>" method="get">
             <div class="row g-2">
                 <!--Search Input-->
                 <div class="col-12 col-md-6">
@@ -232,16 +219,43 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
                     
                     <!--Card Footer-->
                     <div class="mt-3">
-                        <!--Submits name and price of selected book to cart-->
-                        <form action="add_to_cart.php" method="post">
-                            <input type="hidden" name="title" value="<?php echo $row["title"]?>">
-                            <button type="submit" name="buy" value="<?php echo "Rs ". $row["price"] ?>" class="primary_btn">
-                                <i class="bi bi-cart-plus icons"> Buy </i>
-                            </button>
-                            <button type="submit" name="rent" value="<?php echo "Rs ". $row["rental_fee"] ?>" class="secondary_btn">
-                                <i class="bi bi-calendar-week icons"> Borrow </i>
-                            </button>
-                        </form>
+                        <!--Submits book to cart to buy only if user is logged in-->
+                        <?php if ($is_logged_in) { ?>
+                            <form action="shopcart.php" method="post">
+                                <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
+                                <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
+                                <input type="hidden" name="price" value="<?php echo $row["price"]?>">
+                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
+                                <input type="hidden" name="qty" value="1" min="1">
+
+                                <button type="submit" value="<?php echo "Rs ". $row["price"] ?>" class="primary_btn">
+                                    <i class="bi bi-cart-plus icons"> Buy </i>
+                                </button>
+                            </form>
+                        <?php } else { ?>
+                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
+                        <?php }
+                        ?>
+
+                        <!--Submits book to cart to rent only if user is logged in-->
+                        <?php if ($is_logged_in) { ?>
+                            <form action="shopcart.php" method="post">
+                                <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
+                                <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
+                                <input type="hidden" name="price" value="<?php echo $row["rental_fee"]?>">
+                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
+                                <input type="hidden" name="qty" value="1" min="1">
+
+                                <button type="submit" value="<?php echo "Rs ". $row["rental_fee"] ?>" class="secondary_btn">
+                                    <i class="bi bi-calendar-week icons"> Borrow </i>
+                                </button>
+                            </form>
+                        <?php } else { ?>
+                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
+                        <?php }
+                        ?>
                     </div>
                 </div>
 
@@ -263,4 +277,6 @@ if ($_SERVER["REQUEST_METHOD"]== "POST") {
 
 </body>
 </html>
+
+
 

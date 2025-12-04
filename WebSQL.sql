@@ -216,7 +216,7 @@ BEGIN
     FROM Rental r
     JOIN Book b ON r.Book_ID = b.book_ID
     WHERE r.customer_ID = customer AND r.reviewed = 0
-    UNION ALL
+    UNION
 
     -- Purchases
     SELECT 'purchase' AS type, p.purchase_ID AS record_ID, b.book_ID, b.description
@@ -258,6 +258,7 @@ BEGIN
     COMMIT;
 END //
 DELIMITER ;
+
 
 
 

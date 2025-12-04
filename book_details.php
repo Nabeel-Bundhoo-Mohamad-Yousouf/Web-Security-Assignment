@@ -1,4 +1,8 @@
 <?php 
+session_start();
+
+//Holds state of whether or not user is logged in
+$is_logged_in = isset($_SESSION['logged_in']);
 
 //Initiates custom execption handler
 set_exception_handler("custom_exception_handler");
@@ -31,14 +35,11 @@ if ($_SERVER ["REQUEST_METHOD"] == "GET") {
     $genre = htmlspecialchars($_GET["genre"]);
     $search_title = htmlspecialchars($_GET["title"]);
 
-    //Save genre in cookie for 10 days
-    setcookie("last_genre", $genre, time()+ (10*24*60*60), "/");
-
     if (!empty($search_title)) {
 
         try{
             // Include the database connection file
-            require_once "includes/db_connect.php"; 
+            require_once "includes/db_conn.php"; 
             $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             $statement_prepd = $db_conn->prepare("CALL book_preview_search(?)");
@@ -77,7 +78,7 @@ if (!empty($result)){
     
 </head>
 <body>
-    <!--Include header.php-->
+    <!--Include header.html/header.php-->
     <?php include("includes/header.php");?>
 
     <!--Book Preview-->
@@ -119,23 +120,49 @@ if (!empty($result)){
                     <!-- Buy Content -->
                     <div class="tab-pane fade show active p-3" id="buy" role="tabpanel"
                         aria-labelledby="buy_tab">
-                        <form action="add_to_cart.php" method="post">
-                            <input type="hidden" name="title" value="<?php echo $row["title"]?>">
-                            <button type="submit" name="add_to_cart" class="button add_to_cart_btn w-70 align-center">
-                                + Add to cart
-                            </button>
-                        </form>
+
+                        <!--Submits book to cart to buy only if user is logged in-->
+                        <?php if ($is_logged_in) { ?>
+                            <form action="shopcart.php" method="post">
+                                <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
+                                <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
+                                <input type="hidden" name="price" value="<?php echo $row["price"]?>">
+                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
+                                <input type="hidden" name="qty" value="1" min="1">
+                                
+                                <button type="submit" class="button add_to_cart_btn w-70 align-center">
+                                    + Add to cart
+                                </button>
+                            </form>
+                        <?php } else { ?>
+                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
+                        <?php }
+                        ?>
                     </div>
 
                     <!-- Rent Content -->
                     <div class="tab-pane fade p-3" id="borrow" role="tabpanel"
                         aria-labelledby="borrow_tab">
-                        <form action="add_to_cart.php" method="post">
-                            <input type="hidden" name="title" value="<?php echo $row["title"]?>">
-                            <button type="submit" name="add_to_cart" class="button add_to_cart_btn w-70">
-                                + Add to cart
-                            </button>
-                        </form>
+
+                        <!--Submits book to cart to rent only if user is logged in-->
+                        <?php if ($is_logged_in) { ?>
+                            <form action="shopcart.php" method="post">
+                                <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
+                                <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
+                                <input type="hidden" name="price" value="<?php echo $row["rental_fee"]?>">
+                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
+                                <input type="hidden" name="qty" value="1" min="1">
+
+                                <button type="submit" class="button add_to_cart_btn w-70">
+                                    + Add to cart
+                                </button>
+                            </form>
+                        <?php } else { ?>
+                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
+                        <?php }
+                        ?>
                     </div>
                 </div>
             </div>
@@ -207,7 +234,7 @@ if (!empty($result)){
                             <?php echo $row["customer_name"]. " • "  .$row["date"] ?>
                         </p>
                         <p class="review-title"><?php echo $row["review"] ?> </p>
-                        <p class="review-text">
+                        <p class="review-text truncate_multi_line">
                             <?php echo $row["review_description"] ?>
                         </p>
                     </div>
@@ -215,7 +242,7 @@ if (!empty($result)){
             </div>
             
             <?php
-                }        
+    }        
             }
             ?> 
             <!--Carousel Controls-->
@@ -234,9 +261,3 @@ if (!empty($result)){
     <?php include("includes/footer.html")?>
 </body>
 </html>
-
-
-
-
-
-

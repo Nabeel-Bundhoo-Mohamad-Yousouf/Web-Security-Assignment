@@ -115,6 +115,23 @@ CREATE TABLE Messages (
 	date_sent DATETIME NOT NULL
 );
 
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255),
+    address TEXT,
+    payment VARCHAR(50),
+    total DECIMAL(10,2)
+);
+CREATE TABLE order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    book_id INT,
+    title VARCHAR(255),
+    price DECIMAL(10,2),
+    qty INT,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+);
 INSERT INTO book (book_ID,title,author,genre,book_description,price,rental_fee,stock_num,img_url)
 VALUES (2134, '1984', 'George Orwell', 'Science Fiction', 'Nineteen Eighty-Four is a dystopian novel by the English writer George Orwell. It was published on 8 June 1949 by Secker & Warburg as his ninth and final completed book. Thematically, it centres on totalitarianism, mass surveillance and repressive regimentation of people and behaviours.', 420.00, 80.00, 8,"1984.jpg"),
 (2135, 'Pride and Prejudice', 'Jane Austen', 'Romance' , 'Pride and Prejudice is a novel of manners by Jane Austen, first published in 1813. The story follows the main character, Elizabeth Bennet, as she deals with issues of manners, upbringing, morality, education, and marriage in the society of the landed gentry of the British Regency.',  350.00 , 65.00, 20,"Pride and Prejudice.jpg"),
@@ -258,6 +275,7 @@ BEGIN
     COMMIT;
 END //
 DELIMITER ;
+
 
 
 

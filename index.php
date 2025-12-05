@@ -229,7 +229,7 @@ try {
                                 <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
                                 <input type="hidden" name="qty" value="1" min="1">
 
-                                <button type="submit" value="<?php echo "Rs ". $row["price"] ?>" class="primary_btn">
+                                <button type="submit" class="primary_btn">
                                     <i class="bi bi-cart-plus icons"> Buy </i>
                                 </button>
                             </form>
@@ -248,7 +248,7 @@ try {
                                 <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
                                 <input type="hidden" name="qty" value="1" min="1">
 
-                                <button type="submit" value="<?php echo "Rs ". $row["rental_fee"] ?>" class="secondary_btn">
+                                <button type="submit" class="secondary_btn">
                                     <i class="bi bi-calendar-week icons"> Borrow </i>
                                 </button>
                             </form>
@@ -277,6 +277,7 @@ try {
 
 </body>
 </html>
+
 
 
 

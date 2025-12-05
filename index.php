@@ -62,7 +62,7 @@ try {
     
     } //Handles links in footer
     elseif (isset($_GET["referer"]) && $_GET["referer"] === "footer") {
-    $genre = clean_input($_GET["genre"] ?? "");
+    $genre = clean_input($_GET["genre"]);
 
     $statement_prepd = $db_conn->prepare("CALL footer_filters(?)");
     $statement_prepd -> execute([$genre]);
@@ -277,6 +277,7 @@ try {
 
 </body>
 </html>
+
 
 
 

@@ -527,7 +527,7 @@ p {
   border-bottom: none;
 }
 
-/* replaced old modal */
+/* added some changes */
 .modal-overlay {
   position: fixed;
   inset: 0;

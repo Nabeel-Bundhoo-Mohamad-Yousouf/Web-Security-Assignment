@@ -1,93 +1,87 @@
 <?php
 session_start();
 
-
 // CONFIGURATION
 $host = 'localhost';
-$db   = 'Bibliohaha';
+$db = 'Bibliohaha';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
-
-
-
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    PDO::ATTR_EMULATE_PREPARES   => false,
+    PDO::ATTR_EMULATE_PREPARES => false,
 ];
-
-
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
     die("Connection failed: " . $e->getMessage());
 }
 
-
-// Process order status update when form submitted
+// Process order status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $purchaseId = (int)$_POST['purchase_id'];
     $newStatus = $_POST['status'];
-
-    // Validate newStatus against allowed ENUM values
     $allowedStatuses = ['pending', 'completed', 'cancelled'];
     if (!in_array($newStatus, $allowedStatuses)) {
-        $newStatus = 'pending'; // default fallback
+        $newStatus = 'pending';
     }
-
     $stmt = $pdo->prepare("UPDATE Purchase SET status = ? WHERE purchase_ID = ?");
     $stmt->execute([$newStatus, $purchaseId]);
-
-    // Redirect back to orders tab after update
     header("Location: owner_dashboard.php?tab=orders");
     exit;
 }
 
-
-
-// login check - demo auto-login admin
+// login check demo auto-login admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     $_SESSION['user_id'] = 1;
     $_SESSION['role'] = 'admin';
 }
 
-
 // Delete a book
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
-    $pdo->prepare("DELETE FROM Book WHERE book_ID = ?")->execute([$id]);
-    header("Location: dashboard.php");
+    $stmt = $pdo->prepare("DELETE FROM Book WHERE book_ID = ?");
+    $stmt->execute([$id]);
+    header("Location: owner_dashboard.php?tab=books");
     exit;
 }
-
 
 // Logout
 if (isset($_GET['logout'])) {
     session_destroy();
-    header("Location: login.php"); // owner login page
+    header("Location: login.php");
     exit;
 }
 
-
 // Fetch dashboard stats
-$totalBooks = $pdo->query("SELECT COUNT(*) FROM Book")->fetchColumn();
-$pendingOrders = $pdo->query("SELECT COUNT(*) FROM Purchase WHERE status IS NULL OR status = 'pending'")->fetchColumn();
-$totalRevenue = $pdo->query("SELECT total_revenue FROM vw_total_revenue")->fetchColumn();
-$lowStockCount = $pdo->query("SELECT COUNT(*) FROM Book WHERE stock_quantity IS NULL OR stock_quantity <= 5")->fetchColumn();
+$stmtBooks = $pdo->prepare("SELECT COUNT(*) FROM Book");
+$stmtBooks->execute();
+$totalBooks = $stmtBooks->fetchColumn();
 
+$stmtPending = $pdo->prepare("SELECT COUNT(*) FROM Purchase WHERE status IS NULL OR status = 'pending'");
+$stmtPending->execute();
+$pendingOrders = $stmtPending->fetchColumn();
 
+$stmtRevenue = $pdo->prepare("SELECT total_revenue FROM vw_total_revenue");
+$stmtRevenue->execute();
+$totalRevenue = $stmtRevenue->fetchColumn();
+
+$stmtLowStock = $pdo->prepare("SELECT COUNT(*) FROM Book WHERE stock_quantity IS NULL OR stock_quantity <= 5");
+$stmtLowStock->execute();
+$lowStockCount = $stmtLowStock->fetchColumn();
 
 $tab = $_GET['tab'] ?? 'books';
 
-
 // Fetch all books
-$books = $pdo->query("
-    SELECT book_ID, title, author, genre, price, stock_quantity, image_url 
-    FROM Book 
+$stmtBooksList = $pdo->prepare("
+    SELECT book_ID, title, author, genre, price, stock_quantity, image_url
+    FROM Book
     ORDER BY title
-")->fetchAll();
+");
+$stmtBooksList->execute();
+$books = $stmtBooksList->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -142,9 +136,6 @@ $books = $pdo->query("
             </div>
         </div>
     </header>
-
-
-
     <main class="container py-6">
         <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1>Owner Dashboard</h1>
@@ -155,9 +146,6 @@ $books = $pdo->query("
                 Add New Book
             </a>
         </div>
-
-
-
         <!-- Stats Cards -->
         <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
             <div class="stat-card">
@@ -167,11 +155,8 @@ $books = $pdo->query("
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                     </svg>
                 </div>
-                <div class="stat-value"><?php echo $totalBooks; ?></div>
+                <div class="stat-value"><?php echo htmlspecialchars($totalBooks); ?></div>
             </div>
-
-
-
             <div class="stat-card">
                 <div class="stat-header" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <span class="stat-label">Pending Orders</span>
@@ -180,11 +165,8 @@ $books = $pdo->query("
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                 </div>
-                <div class="stat-value"><?php echo $pendingOrders; ?></div>
+                <div class="stat-value"><?php echo htmlspecialchars($pendingOrders); ?></div>
             </div>
-
-
-
             <div class="stat-card">
                 <div class="stat-header" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <span class="stat-label">Total Revenue</span>
@@ -192,9 +174,8 @@ $books = $pdo->query("
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
                     </svg>
                 </div>
-                <div class="stat-value">MUR <?php echo number_format($totalRevenue, 2); ?></div>
+                <div class="stat-value">MUR <?php echo htmlspecialchars(number_format($totalRevenue, 2)); ?></div>
             </div>
-            
             <div class="stat-card" style="background: #fef3c7;">
                 <div class="stat-header" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                     <span class="stat-label">Low Stock Items</span>
@@ -202,24 +183,15 @@ $books = $pdo->query("
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-2.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
                 </div>
-                <div class="stat-value" style="color:var(--destructive);"><?= $lowStockCount ?></div>
+                <div class="stat-value" style="color:var(--destructive);"><?= htmlspecialchars($lowStockCount) ?></div>
             </div>
-
-
-
         </div>
-
-
-
         <!-- Tabs -->
         <div class="tabs">
             <div class="tabs-list" style="border-bottom: 1px solid var(--border); margin-bottom: 2rem;">
                 <a href="?tab=books" class="tab-trigger <?= $tab === 'books' ? 'active' : '' ?>" style="padding: 0.75rem 1.5rem; text-decoration: none; font-weight: 600;<?= $tab === 'books' ? 'border-bottom: 2px solid #3b82f6; color: #3b82f6;' : 'color: #6b7280;' ?>">Manage Books</a>
                 <a href="?tab=orders" class="tab-trigger <?= $tab === 'orders' ? 'active' : '' ?>" style="padding: 0.75rem 1.5rem; text-decoration: none; font-weight: 600;<?= $tab === 'orders' ? 'border-bottom: 2px solid #3b82f6; color: #3b82f6;' : 'color: #6b7280;' ?>">Orders</a>
             </div>
-
-
-
             <?php if ($tab === 'books'): ?>
                 <div class="table-container">
                     <div style="padding: 1.5rem; border-bottom: 1px solid var(--border);">
@@ -228,29 +200,29 @@ $books = $pdo->query("
                     <div style="padding: 1.5rem;">
                         <?php foreach ($books as $book): ?>
                             <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem;">
-                                <img src="<?php echo htmlspecialchars($book['image_url'] ?? 'https://via.placeholder.com/80x100?text=No+Image'); ?>" 
-                                     alt="<?php echo htmlspecialchars($book['title']); ?>" 
+                                <img src="<?php echo htmlspecialchars($book['image_url'] ?? 'https://via.placeholder.com/80x100?text=No+Image'); ?>"
+                                     alt="<?php echo htmlspecialchars($book['title']); ?>"
                                      style="width: 4rem; height: 5rem; object-fit: cover; border-radius: 0.375rem; background: #f3f4f6;" />
-                                
+                               
                                 <div style="flex: 1; min-width: 0;">
                                     <h4><?php echo htmlspecialchars($book['title']); ?></h4>
                                     <p class="text-sm text-muted">by <?php echo htmlspecialchars($book['author'] ?? 'Unknown'); ?></p>
                                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
                                         <span class="badge badge-secondary"><?php echo htmlspecialchars($book['genre'] ?? 'Uncategorized'); ?></span>
-                                        <span style="font-size: 0.875rem;">MUR <?php echo number_format($book['price'], 2); ?></span>
+                                        <span style="font-size: 0.875rem;">MUR <?php echo htmlspecialchars(number_format($book['price'], 2)); ?></span>
                                         <span class="badge <?= ($book['stock_quantity'] ?? 0) <= 5 ? 'badge-destructive' : 'badge-default'; ?>" style="margin-left: auto;">
-                                            <?php echo ($book['stock_quantity'] ?? 0); ?> in stock
+                                            <?php echo htmlspecialchars(($book['stock_quantity'] ?? 0)); ?> in stock
                                         </span>
                                     </div>
                                 </div>
-                                
+                               
                                 <div style="display: flex; gap: 0.5rem;">
-                                    <a href="edit_book.php?id=<?php echo $book['book_ID']; ?>" class="btn btn-outline btn-sm" title="Edit">
+                                    <a href="edit_book.php?id=<?php echo htmlspecialchars($book['book_ID']); ?>" class="btn btn-outline btn-sm" title="Edit">
                                         <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    <a href="?delete=<?php echo $book['book_ID']; ?>" 
+                                    <a href="?delete=<?php echo htmlspecialchars($book['book_ID']); ?>"
                                        onclick="return confirm('Are you sure you want to delete this book?');"
                                        class="btn btn-destructive btn-sm" title="Delete">
                                         <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">

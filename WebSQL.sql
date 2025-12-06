@@ -165,7 +165,7 @@ BEGIN
         c.customer_name
     FROM review AS r
     JOIN customer AS c ON r.customer_ID = c.customer_ID
-    WHERE r.book_ID = search_ID;
+    WHERE r.book_ID = b.book_ID;
 END $$
 
 DELIMITER ;
@@ -278,6 +278,7 @@ BEGIN
     COMMIT;
 END //
 DELIMITER ;
+
 
 
 

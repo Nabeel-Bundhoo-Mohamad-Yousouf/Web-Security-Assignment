@@ -2,79 +2,16 @@
 session_start();
 require_once "includes/db_connect.php"; 
 
-/*
-// Stored Procedures 
-
-// 1. Procedure for Customer ID Fetch (GetCustomerID)
-DELIMITER //
-CREATE PROCEDURE GetCustomerID(IN username VARCHAR(50))
-BEGIN
-    SELECT c.customer_ID
-    FROM Customer c
-    JOIN Users u ON c.user_ID = u.user_ID
-    WHERE u.username = username;
-END //
-DELIMITER ;
-
-// 2. Procedure for Unreviewed Books Fetch (GetUnreviewedBooks)
-DELIMITER //
-CREATE PROCEDURE GetUnreviewedBooks(IN customer INT)
-BEGIN
-    -- Rentals
-    SELECT 'rental' AS type, r.Rent_ID AS record_ID, b.book_ID, b.description
-    FROM Rental r
-    JOIN Book b ON r.Book_ID = b.book_ID
-    WHERE r.customer_ID = customer AND r.reviewed = 0
-    UNION ALL
-
-    -- Purchases
-    SELECT 'purchase' AS type, p.purchase_ID AS record_ID, b.book_ID, b.description
-    FROM Purchase p
-    JOIN Book b ON p.Book_ID = b.book_ID
-    WHERE p.customer_ID = customer AND p.reviewed = 0;
-END //
-DELIMITER ;
-
-// 3. Procedure for Review Submission (AddReviewAndMarkReviewed)
-DELIMITER //
-CREATE PROCEDURE AddReviewAndMarkReviewed(
-    IN p_customer_ID INT,
-    IN p_book_ID INT,
-    IN p_rating INT,
-    IN p_review TEXT,
-    IN p_type VARCHAR(10),
-    IN p_record_ID INT
-)
-BEGIN
-    START TRANSACTION;
-    
--- Insert review
-    INSERT INTO Review(customer_ID, book_ID, rating, review, date)
-    VALUES(p_customer_ID, p_book_ID, p_rating, p_review, CURDATE());
-    
--- Mark rented books as reviewed 
-    UPDATE Rental
-    SET reviewed = 1
-    WHERE Rent_ID = p_record_ID
-    AND p_type = 'rental'; 
-
--- Mark Purchased book as reviwed
-    UPDATE Purchase
-    SET reviewed = 1
-    WHERE purchase_ID = p_record_ID
-    AND p_type = 'purchase';
-
-    COMMIT;
-END //
-DELIMITER ;
-*/
-
 // Ensure user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: index.php");
-    exit();
+//if not message is displayed and user can to login page or home page
+    echo '<div style="text-align:center; margin:50px auto; max-width:400px; font-family:Segoe UI, sans-serif;">
+    <h3 style="color:#e74c3c; margin-bottom:20px;">You must be logged in to write a review.</h3>
+    <a href="login.php" style="display:inline-block; padding:10px 20px; background:#3498db; color:#fff; text-decoration:none; border-radius:5px;">Login Here</a>
+    <a href="index.php" style="display:inline-block; padding:10px 20px; background:#2ecc71; color:#fff; text-decoration:none; border-radius:5px;">Go to Home</a>
+    </div>';
+   exit();
 }
-
 // Session message
 $Msg = $_SESSION['Msg'] ?? "";
 unset($_SESSION['Msg']);
@@ -105,12 +42,15 @@ if (!$customer_ID) {
 function test_input($data) {
     $data = trim($data);
     $data = stripslashes($data);
+    $data = strip_tags($data);
     return htmlspecialchars($data);
 }
 
 // Regex pattern
 $namePattern = "/^[A-Za-z' ]{3,30}$/";
 
+$submitted_review = null;
+$books = [];
 // --- Form Submission Handling 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -136,6 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (strlen($comment) > 500) { $errors['commentErr'] = "Comment cannot exceed 500 characters"; }
         else { $old_inputs['comment'] = $comment; }
     }
+    
     if (empty($_POST['txt_book'])) { $errors['bookErr'] = "Please select a book"; } 
     else { $old_inputs['book'] = $_POST['txt_book']; }
 
@@ -146,12 +87,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: " . $_SERVER['PHP_SELF']);
         exit();
     }
-    
     // Database Processing
     list($type, $record_ID, $book_ID) = explode("|", $_POST['txt_book']);
 
     try {
-        // Calling the Stored Procedures
         $stmtCall = $conn->prepare("
             CALL AddReviewAndMarkReviewed(
                 :p_customer_ID, 
@@ -172,9 +111,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
         $stmtCall->closeCursor();
 
-        $_SESSION['Msg'] = "Review submitted successfully!";
-        header("Location: index.php"); 
-        exit(); 
+        // Store submitted review data to show
+        $submitted_review = [
+            'book_desc' => '',
+            'name' => $name,
+            'rating' => $rating,
+            'comment' => $comment
+        ];
+
+        // Find the book description from $books array
+        foreach ($books as $b) {
+            if ($b['book_ID'] == $book_ID) {
+                $submitted_review['book_desc'] = $b['description'];
+                break;
+            }
+        }
+
+        // Hide the form and show success message
+        $showForm = false;
+        $Msg = "Review submitted successfully!";
 
     } catch (Exception $e) {
         $_SESSION['Msg'] = "Failed to submit review. Please try again. (Database Error)";
@@ -183,7 +138,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-$books = [];
 
 if ($customer_ID) {
     try {
@@ -209,6 +163,7 @@ if ($customer_ID) {
 }
 
 $showForm = (strpos($Msg, 'successfully') === false);
+
 ?>
 
 <!DOCTYPE html>
@@ -262,11 +217,23 @@ $showForm = (strpos($Msg, 'successfully') === false);
 <body>
 <div class="review-container">
     <h3 class="mb-3">Submit a Review</h3>
-    
+
     <?php if ($Msg != ""): ?>
         <h5 class="mt-3 text-center <?php echo strpos($Msg, 'Failed') !== false || strpos($Msg, 'error') !== false ? 'text-danger' : 'text-success'; ?>">
             <?php echo $Msg; ?>
         </h5>
+    <?php endif; ?>
+    
+    <?php if ($submitted_review !== null): ?>
+        <div class="mt-4 p-3 bg-light border rounded">
+            <p><strong>Book:</strong> <?php echo htmlspecialchars($submitted_review['book_desc']); ?></p>
+            <p><strong>Name:</strong> <?php echo htmlspecialchars($submitted_review['name']); ?></p>
+            <p><strong>Rating:</strong> <?php echo $submitted_review['rating']; ?> / 5</p>
+            <?php if (!empty($submitted_review['comment'])): ?>
+                <p><strong>Comment:</strong> <?php echo htmlspecialchars($submitted_review['comment']); ?></p>
+            <?php endif; ?>
+            <a href="index.php" class="btn btn-primary mt-2">Return to Home Page</a>
+        </div>
     <?php endif; ?>
 
     <?php if ($showForm && !empty($errors)): ?>
@@ -278,26 +245,26 @@ $showForm = (strpos($Msg, 'successfully') === false);
         <form method="post">
             <div class="mb-3">
                 <label>Name:</label>
-                <input type="text" class="form-control" name="txt_name" value="<?php echo $old_inputs['name'] ?? ''; ?>">
+                <input type="text" class="form-control" name="txt_name" value="<?php echo $old_inputs['name'] ?? ''; ?>" pattern="[A-Za-z' ]{3,30}" title="Name must be 3-30 letters or spaces" required> 
                 <div class="text-danger"><?php echo $errors['nameErr'] ?? ''; ?></div>
             </div>
 
             <div class="mb-3">
                 <label>Rating:</label>
                 <div class="stars">
-                    <input type="radio" id="star5" name="txt_rating" value="5" <?php if (($old_inputs['rating'] ?? '') == '5') echo 'checked'; ?>>
+                    <input type="radio" id="star5" name="txt_rating" value="5" required <?php if (($old_inputs['rating'] ?? '') == '5') echo 'checked'; ?>>
                     <label for="star5" class="fa fa-star"></label>
 
-                    <input type="radio" id="star4" name="txt_rating" value="4" <?php if (($old_inputs['rating'] ?? '') == '4') echo 'checked'; ?>>
+                    <input type="radio" id="star4" name="txt_rating" value="4" required<?php if (($old_inputs['rating'] ?? '') == '4') echo 'checked'; ?>>
                     <label for="star4" class="fa fa-star"></label>
 
-                    <input type="radio" id="star3" name="txt_rating" value="3" <?php if (($old_inputs['rating'] ?? '') == '3') echo 'checked'; ?>>
+                    <input type="radio" id="star3" name="txt_rating" value="3" required<?php if (($old_inputs['rating'] ?? '') == '3') echo 'checked'; ?>>
                     <label for="star3" class="fa fa-star"></label>
 
-                    <input type="radio" id="star2" name="txt_rating" value="2" <?php if (($old_inputs['rating'] ?? '') == '2') echo 'checked'; ?>>
+                    <input type="radio" id="star2" name="txt_rating" value="2" required<?php if (($old_inputs['rating'] ?? '') == '2') echo 'checked'; ?>>
                     <label for="star2" class="fa fa-star"></label>
 
-                    <input type="radio" id="star1" name="txt_rating" value="1" <?php if (($old_inputs['rating'] ?? '') == '1') echo 'checked'; ?>>
+                    <input type="radio" id="star1" name="txt_rating" value="1" required<?php if (($old_inputs['rating'] ?? '') == '1') echo 'checked'; ?>>
                     <label for="star1" class="fa fa-star"></label>
                 </div>
                 <div class="text-danger"><?php echo $errors['ratingErr'] ?? ''; ?></div>
@@ -305,10 +272,10 @@ $showForm = (strpos($Msg, 'successfully') === false);
 
             <div class="mb-3">
                 <label>Select Book:</label>
-                <select class="form-select" name="txt_book">
+                <select class="form-select" name="txt_book" required>
                 <option value="">--Select--</option>
                 <?php foreach ($books as $book):
-                    $val = $book['type'] . "|" . $book['record_ID'] . "|" . $book['book_ID']; 
+                    $val = $book['type'] . "|" . $book['record_ID'] . "|" . $book['book_ID'] ; 
                 ?>
                 <option value="<?php echo $val; ?>" <?php if (($old_inputs['book'] ?? '') == $val) echo 'selected'; ?>>
                     <?php echo htmlspecialchars($book['description']) . " (" . ($book['type']) . ")"; ?>
@@ -319,7 +286,7 @@ $showForm = (strpos($Msg, 'successfully') === false);
             </div>
             <div class="mb-3">
                 <label>Comment:</label>
-                <textarea class="form-control" name="txt_comment" rows="4"><?php echo $old_inputs['comment'] ?? ''; ?></textarea>
+                <textarea class="form-control" name="txt_comment" rows="4" minlength="5" maxlength="500"><?php echo $old_inputs['comment'] ?? ''; ?></textarea>
             <div class="text-danger"><?php echo $errors['commentErr'] ?? ''; ?></div>
             </div>
 
@@ -328,8 +295,11 @@ $showForm = (strpos($Msg, 'successfully') === false);
                 <button type="reset" class="btn btn-secondary">Reset</button>
             </div>
         </form>
-        <?php else: ?>
-            <h5 class="text-success text-center mt-4">You have no books to review. Thank you!</h5>
+       <?php else: ?>
+            <div class="text-center mt-4">
+                <h5 class="text-success mb-3">You have no books to review. Thank you!</h5>
+                <a href="index.php" class="btn btn-primary">Return to Home Page</a>
+            </div>
         <?php endif; ?>
     <?php endif; ?>
 

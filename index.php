@@ -42,7 +42,7 @@ function clean_input($data) {
 }
 
 //Include the database connection file
-require_once "includes/db_conn.php";
+require_once "includes/db_connection.php";
 $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 try {
@@ -282,3 +282,4 @@ try {
 
 </body>
 </html>
+

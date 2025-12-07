@@ -38,7 +38,7 @@ if ($_SERVER ["REQUEST_METHOD"] == "GET") {
     if (!empty($search_title)) {
         try{
             // Include the database connection file
-            require_once "includes/db_conn.php"; 
+            require_once "includes/db_connect.php"; 
             $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             $statement_prepd = $db_conn->prepare("CALL book_preview_search(?)");
@@ -266,3 +266,4 @@ if (!empty($result)){
     <?php include("includes/footer.html")?>
 </body>
 </html>
+

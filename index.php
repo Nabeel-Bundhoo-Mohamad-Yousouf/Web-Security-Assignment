@@ -62,7 +62,7 @@ try {
     
     } //Handles links in footer
     elseif (isset($_GET["referer"]) && $_GET["referer"] === "footer") {
-    $genre = clean_input($_GET["genre"]);
+    $genre = clean_input($_GET["genre"] ?? "");
 
     $statement_prepd = $db_conn->prepare("CALL footer_filters(?)");
     $statement_prepd -> execute([$genre]);
@@ -186,7 +186,7 @@ try {
                 style="text-decoration: none;">
 
                     <!--Card Image-->
-                    <img class=" card-img-top img-responsive rounded book-card__image" src="images/<?php echo $row["img_url"] ?>" 
+                    <img class=" card-img-top img-responsive rounded book-card__image" src="images/<?php echo htmlspecialchars($row["img_url"]) ?>" 
                     alt="Image of <?php echo $row["title"]. " by " .$row["author"]?>"/>
                     
                     <!--Card Body-->
@@ -209,8 +209,8 @@ try {
                                 <span style="color: var(--text-primary);"> (<?php echo $row["rating_num"]?>)</span>
                             </div>
                         </div>
-                        <p class="book-card__title"> <?php echo $row["title"]?> </p>
-                        <p class="book-card__author"> <?php echo $row["author"]?> </p>
+                        <p class="book-card__title"> <?php echo htmlspecialchars($row["title"])?> </p>
+                        <p class="book-card__author"> <?php echo htmlspecialchars($row["author"])?> </p>
                         <p class="book-card__description truncate_multi_line"> <?php echo $row["book_description"]?> </p>
                         <p> Buy: <span class="book-card__price"> <?php echo "Rs ". $row["price"]?> </span></p>
                         <p> Borrow (7 days): <span class="book-card__price_borrow"> <?php echo "Rs ". $row["rental_fee"] ?> </span></p>
@@ -220,45 +220,51 @@ try {
                     <!--Card Footer-->
                     <div class="mt-3">
                         <!--Submits book to cart to buy only if user is logged in-->
-                        <?php if ($is_logged_in) { ?>
                             <form action="shopcart.php" method="post">
                                 <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
                                 <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
                                 <input type="hidden" name="price" value="<?php echo $row["price"]?>">
-                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="image" value="<?php echo htmlspecialchars($row["img_url"])?>">
                                 <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
-                                <input type="hidden" name="qty" value="1" min="1">
+                                <input type="hidden" name="qty" value="1">
 
+                                <?php if ($is_logged_in) { ?>
                                 <button type="submit" class="primary_btn">
                                     <i class="bi bi-cart-plus icons"> Buy </i>
                                 </button>
+
+                                <?php } else { ?>
+                                <a href="login.php" class="btn primary_btn">
+                                    <i class="bi bi-cart-plus icons"> Buy </i>
+                                </a>
+                                <?php }
+                                ?>
                             </form>
-                        <?php } else { ?>
-                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
-                        <?php }
-                        ?>
 
                         <!--Submits book to cart to rent only if user is logged in-->
-                        <?php if ($is_logged_in) { ?>
                             <form action="shopcart.php" method="post">
                                 <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
                                 <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
                                 <input type="hidden" name="price" value="<?php echo $row["rental_fee"]?>">
-                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="image" value="<?php echo htmlspecialchars($row["img_url"])?>">
                                 <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
                                 <input type="hidden" name="qty" value="1" min="1">
 
+
+                                <?php if ($is_logged_in) { ?>
                                 <button type="submit" class="secondary_btn">
                                     <i class="bi bi-calendar-week icons"> Borrow </i>
                                 </button>
-                            </form>
-                        <?php } else { ?>
-                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
-                        <?php }
-                        ?>
+
+                                <?php } else { ?>
+                                <a href="login.php" class="btn secondary_btn">
+                                    <i class="bi bi-calendar-week icons"> Borrow </i> 
+                                    </a>
+                                <?php }
+                                ?>
+                            </form> 
                     </div>
                 </div>
-
                 <?php 
                 }
                 ?>
@@ -269,7 +275,6 @@ try {
             } 
             ?>
             
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous" defer></script>
 
 <!--Include footer.html-->
@@ -277,8 +282,3 @@ try {
 
 </body>
 </html>
-
-
-
-
-

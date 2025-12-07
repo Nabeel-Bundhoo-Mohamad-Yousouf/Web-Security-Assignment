@@ -68,7 +68,7 @@ $stmtRevenue = $pdo->prepare("SELECT total_revenue FROM vw_total_revenue");
 $stmtRevenue->execute();
 $totalRevenue = $stmtRevenue->fetchColumn();
 
-$stmtLowStock = $pdo->prepare("SELECT COUNT(*) FROM Book WHERE stock_quantity IS NULL OR stock_quantity <= 5");
+$stmtLowStock = $pdo->prepare("SELECT COUNT(*) FROM Book WHERE stock_num IS NULL OR stock_num <= 5");
 $stmtLowStock->execute();
 $lowStockCount = $stmtLowStock->fetchColumn();
 
@@ -76,7 +76,7 @@ $tab = $_GET['tab'] ?? 'books';
 
 // Fetch all books
 $stmtBooksList = $pdo->prepare("
-    SELECT book_ID, title, author, genre, price, stock_quantity, image_url
+    SELECT book_ID, title, author, genre, price, stock_num, img_url
     FROM Book
     ORDER BY title
 ");
@@ -88,6 +88,7 @@ $books = $stmtBooksList->fetchAll();
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow">
     <title>Owner Dashboard - Bibliohaha</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
@@ -191,6 +192,7 @@ $books = $stmtBooksList->fetchAll();
             <div class="tabs-list" style="border-bottom: 1px solid var(--border); margin-bottom: 2rem;">
                 <a href="?tab=books" class="tab-trigger <?= $tab === 'books' ? 'active' : '' ?>" style="padding: 0.75rem 1.5rem; text-decoration: none; font-weight: 600;<?= $tab === 'books' ? 'border-bottom: 2px solid #3b82f6; color: #3b82f6;' : 'color: #6b7280;' ?>">Manage Books</a>
                 <a href="?tab=orders" class="tab-trigger <?= $tab === 'orders' ? 'active' : '' ?>" style="padding: 0.75rem 1.5rem; text-decoration: none; font-weight: 600;<?= $tab === 'orders' ? 'border-bottom: 2px solid #3b82f6; color: #3b82f6;' : 'color: #6b7280;' ?>">Orders</a>
+                <a href="?tab=rentals" class="tab-trigger <?= $tab === 'rentals' ? 'active' : '' ?>" style="padding:.75rem 1.5rem;text-decoration:none;font-weight:600;<?=$tab==='rentals'?'border-bottom:2px solid #3b82f6;color:#3b82f6;':'color:#6b7280;'?>">Rentals & Returns</a>
             </div>
             <?php if ($tab === 'books'): ?>
                 <div class="table-container">
@@ -200,7 +202,7 @@ $books = $stmtBooksList->fetchAll();
                     <div style="padding: 1.5rem;">
                         <?php foreach ($books as $book): ?>
                             <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem;">
-                                <img src="<?php echo htmlspecialchars($book['image_url'] ?? 'https://via.placeholder.com/80x100?text=No+Image'); ?>"
+                                <img src="<?php echo htmlspecialchars($book['img_url'] ?? 'https://via.placeholder.com/80x100?text=No+Image'); ?>"
                                      alt="<?php echo htmlspecialchars($book['title']); ?>"
                                      style="width: 4rem; height: 5rem; object-fit: cover; border-radius: 0.375rem; background: #f3f4f6;" />
                                
@@ -210,8 +212,8 @@ $books = $stmtBooksList->fetchAll();
                                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
                                         <span class="badge badge-secondary"><?php echo htmlspecialchars($book['genre'] ?? 'Uncategorized'); ?></span>
                                         <span style="font-size: 0.875rem;">MUR <?php echo htmlspecialchars(number_format($book['price'], 2)); ?></span>
-                                        <span class="badge <?= ($book['stock_quantity'] ?? 0) <= 5 ? 'badge-destructive' : 'badge-default'; ?>" style="margin-left: auto;">
-                                            <?php echo htmlspecialchars(($book['stock_quantity'] ?? 0)); ?> in stock
+                                        <span class="badge <?= ($book['stock_num'] ?? 0) <= 5 ? 'badge-destructive' : 'badge-default'; ?>" style="margin-left: auto;">
+                                            <?php echo htmlspecialchars(($book['stock_num'] ?? 0)); ?> in stock
                                         </span>
                                     </div>
                                 </div>
@@ -239,6 +241,8 @@ $books = $stmtBooksList->fetchAll();
                 </div>
             <?php elseif ($tab === 'orders'): ?>
                 <?php include 'orders.php'; ?>
+            <?php elseif ($tab === 'rentals'): ?>
+                <?php include 'rentals.php'; ?>
             <?php endif; ?>
         </div>
     </main>

@@ -28,11 +28,11 @@ CREATE TABLE Book (
     title VARCHAR(255) NOT NULL,
     author VARCHAR(255) NOT NULL,
     genre VARCHAR(100),
-    description TEXT,
+    book_description TEXT,
     price DECIMAL(10,2) NOT NULL,
     rental_fee DECIMAL(10,2) NOT NULL,
-    stock_quantity INT NOT NULL DEFAULT 0,
-    image_url VARCHAR(500),
+    stock_num INT NOT NULL DEFAULT 0,
+    img_url VARCHAR(500),
     INDEX idx_title (title),
     INDEX idx_genre (genre)
 );
@@ -76,7 +76,7 @@ CREATE TABLE Review (
     FOREIGN KEY (book_ID) REFERENCES Book(book_ID) ON DELETE CASCADE
 );
 
--- Messages ...message instead of meesage ...need to be fixed on main branch
+-- Messages 
 CREATE TABLE Messages (
     message_ID INT AUTO_INCREMENT PRIMARY KEY,
     sender_name VARCHAR(100) NOT NULL,
@@ -85,8 +85,8 @@ CREATE TABLE Messages (
     date_sent DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Sample Books (it might conflict with what's on main branch)
-INSERT INTO Book (book_ID, title, author, genre, description, price, rental_fee, stock_quantity, image_url) VALUES
+-- Sample Books 
+INSERT INTO Book (book_ID, title, author, genre, book_description, price, rental_fee, stock_num, img_url) VALUES
 (2134, '1984', 'George Orwell', 'Science Fiction', 'Nineteen Eighty-Four is a dystopian novel...', 420.00, 80.00, 8, '1984.jpg'),
 (2135, 'Pride and Prejudice', 'Jane Austen', 'Romance', 'Pride and Prejudice is a novel of manners...', 350.00, 65.00, 20, 'Pride and Prejudice.jpg'),
 (2136, 'Steve Jobs', 'Walter Isaacson', 'Biography', 'Steve Jobs is the authorized biography...', 480.00, 90.00, 10, 'Steve Jobs.jpg'),
@@ -105,6 +105,6 @@ WHERE status = 'completed';
 -- Sample Admin User (password = "admin123" hashed with password_hash())
 INSERT INTO Users (username, password) VALUES 
 ('admin', '$2y$10$JDJ5JDEwJEdvLmJ5dGVzJDEwJHMxMiRjYXJyeS5zYWx0JGRhdGE=');
--- Note to Nabeel:  real hash for "admin123" → use password_hash('admin123', PASSWORD_DEFAULT) in PHP
+-- Note:  real hash for "admin123" → use password_hash('admin123', PASSWORD_DEFAULT) in PHP
 
 INSERT INTO Admin (user_ID) VALUES (1);

@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $inStock     = trim($_POST['inStock'] ?? '');
     $category    = trim($_POST['category'] ?? '');
     $coverUrl    = trim($_POST['coverUrl'] ?? '');
-    $description = trim($_POST['description'] ?? '');
+    $book_description = trim($_POST['book_description'] ?? '');
 
     // Server side validation
     if ($title === '')                                      $errors[] = "Title is required.";
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         //safe prepared statement
         $stmt = $pdo->prepare("
             INSERT INTO Book 
-                (title, author, price, rental_fee, stock_quantity, genre, image_url, description)
+                (title, author, price, rental_fee, stock_num, genre, img_url, book_description)
             VALUES 
                 (?, ?, ?, ?, ?, ?, ?, ?)
         ");
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             (int)$inStock,
             $category,
             $coverUrl !== '' ? $coverUrl : null,
-            $description !== '' ? $description : null
+            $book_description !== '' ? $book_description : null
         ]);
 
         $success = true;
@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow">
     <title>Add New Book - Bibliohaha</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
@@ -166,8 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="form-group">
-            <label for="description">Description (optional)</label>
-            <textarea id="description" name="description" rows="3" placeholder="Enter book description"><?= htmlspecialchars($_POST['description'] ?? '') ?></textarea>
+            <label for="book_description">Description (optional)</label>
+            <textarea id="book_description" name="book_description" rows="3" placeholder="Enter book description"><?= htmlspecialchars($_POST['book_description'] ?? '') ?></textarea>
         </div>
 
         <div class="form-actions">

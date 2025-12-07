@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stockQty    = trim($_POST['inStock'] ?? '');
     $category    = trim($_POST['category'] ?? '');
     $coverUrl    = trim($_POST['coverUrl'] ?? '');
-    $description = trim($_POST['description'] ?? '');
+    $book_description = trim($_POST['book_description'] ?? '');
 
     // Server-side validation
     if ($title === '')               $errors[] = "Title is required.";
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("
             UPDATE Book
             SET title = ?, author = ?, price = ?, rental_fee = ?, 
-                stock_quantity = ?, genre = ?, image_url = ?, description = ?
+                stock_num = ?, genre = ?, img_url = ?, book_description = ?
             WHERE book_ID = ?
         ");
         $stmt->execute([
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stockQty,
             $category,
             $coverUrl !== '' ? $coverUrl : null,
-            $description !== '' ? $description : null,
+            $book_description !== '' ? $book_description : null,
             $bookID
         ]);
 
@@ -95,10 +95,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'author' => $author,
             'price' => $price,
             'rental_fee' => $rental_fee,
-            'stock_quantity' => $stockQty,
+            'stock_num' => $stockQty,
             'genre' => $category,
-            'image_url' => $coverUrl,
-            'description' => $description
+            'img_url' => $coverUrl,
+            'book_description' => $book_description
         ]);
     }
 }
@@ -110,10 +110,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !empty($errors)) {
         'author'      => $book['author'] ?? '',
         'price'       => $book['price'] ?? '',
         'rental_fee'  => $book['rental_fee'] ?? '',
-        'inStock'     => $book['stock_quantity'] ?? '',
+        'inStock'     => $book['stock_num'] ?? '',
         'category'    => $book['genre'] ?? '',
-        'coverUrl'    => $book['image_url'] ?? '',
-        'description' => $book['description'] ?? ''
+        'coverUrl'    => $book['img_url'] ?? '',
+        'book_description' => $book['book_description'] ?? ''
     ];
 }
 ?>
@@ -122,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !empty($errors)) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow">
     <title>Edit Book - Bibliohaha Owner Dashboard</title>
     <link rel="stylesheet" href="styles.css" />
     <style>
@@ -207,8 +208,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !empty($errors)) {
         </div>
 
         <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4" placeholder="Enter book description (optional)"><?= htmlspecialchars($_POST['description']) ?></textarea>
+            <label for="book_description">Description</label>
+            <textarea id="book_description" name="book_description" rows="4" placeholder="Enter book description (optional)"><?= htmlspecialchars($_POST['book_description']) ?></textarea>
         </div>
 
         <div class="form-actions">

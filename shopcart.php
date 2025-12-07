@@ -1,6 +1,6 @@
 <?php
 session_start();
-include "db.php";
+include "includes/db_connect.php";
 
 if (!isset($_SESSION["cart"]) || empty($_SESSION["cart"])) {
     echo "Your cart is empty.";
@@ -92,3 +92,4 @@ th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
 
 </body>
 </html>
+

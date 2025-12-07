@@ -36,7 +36,6 @@ if ($_SERVER ["REQUEST_METHOD"] == "GET") {
     $search_title = htmlspecialchars($_GET["title"]);
 
     if (!empty($search_title)) {
-
         try{
             // Include the database connection file
             require_once "includes/db_conn.php"; 
@@ -122,23 +121,26 @@ if (!empty($result)){
                         aria-labelledby="buy_tab">
 
                         <!--Submits book to cart to buy only if user is logged in-->
-                        <?php if ($is_logged_in) { ?>
                             <form action="shopcart.php" method="post">
                                 <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
                                 <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
                                 <input type="hidden" name="price" value="<?php echo $row["price"]?>">
-                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="image" value="<?php echo htmlspecialchars($row["img_url"])?>">
                                 <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
-                                <input type="hidden" name="qty" value="1" min="1">
+                                <input type="hidden" name="qty" value="1">
                                 
+                                <?php if ($is_logged_in) { ?>
                                 <button type="submit" class="button add_to_cart_btn w-70 align-center">
                                     + Add to cart
                                 </button>
+
+                                <?php } else { ?>
+                                    <a href="login.php" class="btn add_to_cart_btn">
+                                        + Add to cart
+                                    </a>
+                                <?php }
+                                ?>
                             </form>
-                        <?php } else { ?>
-                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
-                        <?php }
-                        ?>
                     </div>
 
                     <!-- Rent Content -->
@@ -146,23 +148,26 @@ if (!empty($result)){
                         aria-labelledby="borrow_tab">
 
                         <!--Submits book to cart to rent only if user is logged in-->
-                        <?php if ($is_logged_in) { ?>
                             <form action="shopcart.php" method="post">
                                 <input type="hidden" name="id" value="<?php echo $row["book_ID"]?>">
                                 <input type="hidden" name="title" value="<?php echo htmlspecialchars($row["title"])?>">
                                 <input type="hidden" name="price" value="<?php echo $row["rental_fee"]?>">
-                                <input type="hidden" name="image" value="<?php echo $row["img_url"]?>">
+                                <input type="hidden" name="image" value="<?php echo htmlspecialchars($row["img_url"])?>">
                                 <input type="hidden" name="author" value="<?php echo htmlspecialchars($row["author"])?>">
-                                <input type="hidden" name="qty" value="1" min="1">
+                                <input type="hidden" name="qty" value="1">
 
-                                <button type="submit" class="button add_to_cart_btn w-70">
+                                <?php if ($is_logged_in) { ?>
+                                <button type="submit" class="button add_to_cart_btn w-70 align-center">
                                     + Add to cart
                                 </button>
+
+                                <?php } else { ?>
+                                    <a href="login.php" class="btn add_to_cart_btn">
+                                        + Add to cart
+                                    </a>
+                                <?php }
+                                ?>
                             </form>
-                        <?php } else { ?>
-                        <p>Please <a href="login.php">log in</a> to add items to your cart.</p>
-                        <?php }
-                        ?>
                     </div>
                 </div>
             </div>

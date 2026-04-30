@@ -1,0 +1,46 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "message": {"type": "string"},
+        
+        "data": {
+            "type": "object",
+            "properties": {
+                "book": {
+                    "type": "object",
+                    "properties": {
+                        "book_ID": {"type": "integer"},
+                        "title": {"type": "string"},
+                        "author": {"type": "string"},
+                        "rating_num": {"type": "number"},
+                        "avg_rating": {"type": "number"}
+                    },
+                    "required": ["book_ID", "title", "author", "rating_num", "avg_rating"],
+                    "additionalProperties": false
+                },
+
+                "reviews": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "review": {"type": "string"},
+                            "review_description": {"type": "string"},
+                            "date": {"type": "string", "format": "date"},
+                            "rating": {"type": "integer"},
+                            "customer_name": {"type": "string"}
+                        },
+
+                        "required": ["review", "review_description", "date", "rating"],
+                        "additionalProperties": false,
+                    }
+                }
+            },
+            "required": ["book", "reviews"],
+            "additionalProperties": false
+        }
+    },
+    "required": ["message", "data"]
+}

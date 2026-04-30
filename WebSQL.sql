@@ -145,16 +145,21 @@ VALUES (2134, '1984', 'George Orwell', 'Science Fiction', 'Nineteen Eighty-Four 
 (2140, 'The Name of the Wind', 'Patrick Rothfuss', 'Fantasy', 'So begins a tale unequaled in fantasy literature—the story of a hero told in his own voice. It is a tale of sorrow, a tale of survival, a tale of the search for meaning in his universe, and how that search, and the indomitable will that drove it, gave birth to a legend.', 440.00, 85.00, 16,"The Name of the Wind.jpg"),
 (2141, 'To Kill a Mockingbird', 'Harper Lee', 'Fiction', 'To Kill a Mockingbird is a 1961 novel by Harper Lee. Set in small-town Alabama, the novel is a bildungsroman, or coming-of-age story, and chronicles the childhood of Scout and Jem Finch as their father Atticus defends a Black man falsely accused of rape. Scout and Jem are mocked by classmates for this.', 380.00, 70.00, 12,"To Kill a Mockingbird.jpg");
 
-CREATE PROCEDURE book_preview_search (IN search_title INT)
+CREATE PROCEDURE book_preview_search (IN book_id INT)
 BEGIN
     -- First query: Book details with aggregate ratings
     SELECT 
         b.*, 
-        COUNT(r.rating) AS rating_num, 
-        AVG(r.rating) AS avg_rating
+        r.rating_num, 
+        r.avg_rating
     FROM book AS b 
-    LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-    WHERE b.title = search_title 
+    LEFT JOIN (
+        SELECT book_ID, COALESCE(COUNT(rating), 0) AS rating_num, COALESCE(AVG(rating),0) AS avg_rating 
+        FROM review
+        GROUP BY book_ID) 
+        AS r 
+        ON b.book_ID = r.book_ID
+    WHERE b.book_ID = book_id 
     GROUP BY b.book_ID;
     
     -- Second query: Individual reviews for the book
@@ -162,6 +167,7 @@ BEGIN
         r.review, 
         r.review_description, 
         r.date, 
+        r.rating
         c.customer_name
     FROM review AS r
     JOIN customer AS c ON r.customer_ID = c.customer_ID
@@ -172,44 +178,42 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE PROCEDURE search_books(IN search_term TEXT, IN genre_search TEXT, IN filter TEXT)
+CREATE PROCEDURE load_books(IN search_term TEXT, IN filter TEXT, IN sort TEXT, IN book_limit INT, IN book_offset INT)
 BEGIN
-SELECT b.*, COALESCE(COUNT(r.rating), 0) AS rating_num, COALESCE(AVG(r.rating),0) AS avg_rating  
+SELECT b.*, r.rating_num, r.avg_rating
 FROM book AS b 
-LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-WHERE (b.title LIKE CONCAT('%',search_term, '%') OR b.author LIKE CONCAT('%',search_term, '%')) 
-AND (genre_search IS NULL OR genre_search = b.genre)
-GROUP BY b.book_ID
+LEFT JOIN 
+    (SELECT book_ID, COALESCE(COUNT(rating), 0) AS rating_num, COALESCE(AVG(rating),0) AS avg_rating 
+    FROM review
+    GROUP BY book_ID) 
+    AS r 
+    ON b.book_ID = r.book_ID
+WHERE (
+    search_term IS NULL
+    OR search_term = ''
+    OR b.title LIKE CONCAT('%',search_term, '%') 
+    OR b.author LIKE CONCAT('%',search_term, '%')
+    ) 
+    AND (filter IS NULL OR filter = '' OR b.genre = filter)
 ORDER BY 
-CASE WHEN filter LIKE '%author%' THEN b.author END,
-CASE WHEN filter LIKE '%price_asc%' THEN b.price END ASC,
-CASE WHEN filter LIKE '%price_desc%' THEN b.price END DESC,
+CASE WHEN sort = "author" THEN b.author END,
+CASE WHEN sort = "price_asc" THEN b.price END ASC,
+CASE WHEN sort = "price_desc" THEN b.price END DESC,
 b.title ASC
-LIMIT 6;
-END $$
-
-DELIMITER ;
-
-DELIMITER $$
-
-CREATE PROCEDURE footer_filters (IN genre_filter TEXT)
-BEGIN
-SELECT b.*, COUNT(r.rating) AS rating_num, AVG(r.rating) AS avg_rating
-FROM book AS b 
-LEFT JOIN review AS r ON b.book_ID = r.book_ID
-WHERE b.genre= genre_filter;
-END $$
+LIMIT book_limit OFFSET book_offset;
 
 DELIMITER ;
 
 CREATE VIEW view_books AS
-SELECT b.*, COUNT(r.rating) AS rating_num, AVG(r.rating) AS avg_rating 
+SELECT b.*, r.rating_num, r.avg_rating
 FROM book AS b 
-LEFT JOIN review AS r ON b.book_ID = r.book_ID 
-GROUP BY b.book_ID
-ORDER BY avg_rating DESC
-LIMIT 12;
-
+LEFT JOIN 
+    (SELECT book_ID, COUNT(rating) AS rating_num, AVG(rating) AS avg_rating
+    FROM review
+    GROUP BY book_ID) 
+    AS r 
+    ON b.book_ID = r.book_ID
+ORDER BY r.avg_rating DESC;
 
 CREATE VIEW vw_total_revenue AS
 SELECT COALESCE(SUM(p.price * p.quantity), 0) AS total_revenue

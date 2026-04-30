@@ -1,0 +1,74 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://api.example.com/ownerhouses.json#",
+    "type": "array",
+	"minItems": 1, 
+	"uniqueitems": true,
+	"items": {
+		"$ref": "#/definitions/owner"
+	}, 	
+ 	"additionalProperties": false,
+ 	
+ 	"definitions": {
+ 		"owner":{
+ 			"type": "object",	
+			"properties": {
+				"owner_name": {
+					"type": "string",
+					"minLength": 1,
+					"maxLength": 200
+				},	
+				"owner_id": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"owner_email": {
+					"type": "string",
+					"maxLength": 200,
+					"format": "email"
+				},
+				"owner_phone": {
+					"type": "integer"
+				},
+				"houses": {
+					"type": "array",
+					"minItems": 0, 
+					"uniqueitems": true,
+					"items": {
+						"$ref": "#/definitions/house"
+					}
+				}
+			},
+			"required": ["owner_name", "owner_id", "owner_email", "owner_phone", "houses"],
+			"additionalProperties": false	
+ 		},
+ 		"house": {
+ 			"type": "object",
+ 			
+ 			"properties":{
+				"house_id": {
+					"type": "integer",
+					"minimum": 1
+				},
+				"address": {
+					"type": "string",
+					"maxLength": 200
+				},
+				"list_price": {
+					"type": "number",
+					"minimum": 5,
+					"maximum": 765467676766
+				},
+				"swimming_pool": {
+					"type": "number",
+					"minimum":0,
+					"maximum":1
+				}
+			},
+			"required": ["house_id", "address", "list_price", "swimming_pool"],
+			"additionalProperties": false
+ 			
+ 		}
+ 	}
+}
+

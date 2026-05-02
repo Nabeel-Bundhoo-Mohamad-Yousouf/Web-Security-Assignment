@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Book Review Submission",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string", "minLength": 3, "maxLength": 30, "pattern": "^[A-Za-z' ]+$" },
+    "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "book": { "type": "string", "minLength": 1 },
+    "comment": { "type": "string", "maxLength": 500 }
+  },
+  "required": ["name", "rating", "book"]
+}
